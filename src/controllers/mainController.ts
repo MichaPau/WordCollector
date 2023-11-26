@@ -1,6 +1,6 @@
 import { LitElement, ReactiveController, ReactiveControllerHost } from "lit";
 
-import Database from "tauri-plugin-sql-api";
+import Database, { QueryResult } from "tauri-plugin-sql-api";
 
 
 import { Table, Word, Language, Type } from "../app-types";
@@ -33,7 +33,7 @@ export class AppController implements ReactiveController{
         console.log("connectDB");
         //C:\Data\projects\web\Tauri\Tauri-Lit-Test\src-tauri\data\words.db
         //this.db = await Database.load("sqlite:words.db");
-        this.db = await Database.load("sqlite:C:\\Data\\projects\\web\\Tauri\\Tauri-Lit-Test\\src-tauri\\data\\words.db");
+        this.db = await Database.load("sqlite:C:\\Data\\projects\\web\\Tauri\\WordCollector\\src-tauri\\data\\words.db");
     }
 
     async selectAll<T>(table:string): Promise<Array<T>> {
@@ -67,13 +67,27 @@ export class AppController implements ReactiveController{
        
     //     return result;
     // }
+
+    async checkDuplicate<T>(q:string, values:Array<string>):Promise<T> {
+        let result = await this.db.select(q, values);
+        console.log(result);
+        return result as T;
+    }
     async addWord(word:Word) {
-        const q = "INSERT INTO word (word, language, type) VALUES ($1, $2, $3)";
-        try {
-            let result = await this.db.execute(q, [word.word, word.language, word.type]);
-            return result;
-        } catch(e) {
-            throw(e);
+        const checkQuery = "SELECT COUNT(*) FROM word WHERE word = $1 AND language = $2 AND type = $3";
+
+        let check:Array<unknown> = await this.checkDuplicate(checkQuery, [word.word, word.language, word.type]);
+
+        if(check.length > 0) {
+            throw new Error("Exact duplicate is already in the database.");
+        } else {
+            const q = "INSERT INTO word (word, language, type) VALUES ($1, $2, $3)";
+            try {
+                let result = await this.db.execute(q, [word.word, word.language, word.type]);
+                return result;
+            } catch(e) {
+                throw(e);
+            }
         }
     }
     

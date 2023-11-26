@@ -10,7 +10,6 @@ export class AddLangDialog extends LitElement {
         form {
             margin: 0 auto;
             width: 450px;
-            /* Form outline */
             padding: 1em;
             border: 1px solid #ccc;
             border-radius: 1em;
