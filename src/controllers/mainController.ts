@@ -70,15 +70,16 @@ export class AppController implements ReactiveController{
 
     async checkDuplicate<T>(q:string, values:Array<string>):Promise<T> {
         let result = await this.db.select(q, values);
-        console.log(result);
         return result as T;
     }
     async addWord(word:Word) {
-        const checkQuery = "SELECT COUNT(*) FROM word WHERE word = $1 AND language = $2 AND type = $3";
+        const checkQuery = "SELECT COUNT(*) as count FROM word WHERE word = $1 AND language = $2 AND type = $3";
 
-        let check:Array<unknown> = await this.checkDuplicate(checkQuery, [word.word, word.language, word.type]);
+        //let check:Array<unknown> = await this.checkDuplicate(checkQuery, [word.word, word.language, word.type]);
+        let check:Array<{count: number}> = await this.checkDuplicate(checkQuery, [word.word, word.language, word.type]);
+        console.log("Found: ", check[0].count);
 
-        if(check.length > 0) {
+        if(check[0].count > 0) {
             throw new Error("Exact duplicate is already in the database.");
         } else {
             const q = "INSERT INTO word (word, language, type) VALUES ($1, $2, $3)";

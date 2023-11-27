@@ -3,6 +3,8 @@ import {customElement, property} from 'lit/decorators.js';
 
 import { Language, } from './../app-types.js';
 
+import '../components/lang-dlg.js';
+
 @customElement('language-edit')
 export class LanguageEdit extends LitElement {
 
@@ -22,7 +24,7 @@ export class LanguageEdit extends LitElement {
     <ul class="horizontal">
         ${this.lang_list.map((lang) => html`<li>${lang.token}</li>`)}
     </ul>
-    <add-lang-dialog></add-lang-dialog>
+    <lang-dialog .lang_list=${this.lang_list}></lang-dialog>
    
     `;
   }

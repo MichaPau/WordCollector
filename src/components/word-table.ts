@@ -1,7 +1,9 @@
 import { LitElement, html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property} from 'lit/decorators.js';
 
 import { Word } from '../app-types';
+
+import resetStyles from '../styles/default-component.styles.js';
 
 @customElement('word-table')
 export class WordTable extends LitElement {
@@ -9,7 +11,9 @@ export class WordTable extends LitElement {
     @property({type: Array})
     words:Array<Word> = [];
 
-    static styles = css`
+    static styles = [
+        resetStyles,
+        css`
         #word-table {
             width: 100%;
             border-collapse: collapse;
@@ -22,8 +26,8 @@ export class WordTable extends LitElement {
 
         tbody tr:nth-child(odd) {
             background: #eee;
-          }
-    `;
+        }`
+    ];
     
     render() {
         return html`

@@ -1,6 +1,8 @@
 import { LitElement, html, css, PropertyValueMap } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { Language, Type, Word, deferred } from '../app-types';
+
+import resetStyles from '../styles/default-component.styles.js';
 
 @customElement('word-dialog')
 export class WordDialog extends LitElement {
@@ -14,32 +16,36 @@ export class WordDialog extends LitElement {
     @property({type: Object})
     word?: Word;
 
-    static styles = css`
+    static styles = [
+    
+        resetStyles,
+        css`
 
-    #word-form {
-        display: flex;
-        flex-direction: column;
-        gap: var(--main-padding);
-    }
-    .error {
-        color: var(--error-color);
-    }
+        #word-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--main-padding);
+        }
+        .error {
+            color: var(--error-color);
+        }
 
-    .success {
-        color: var(--success-color);
-    }
+        .success {
+            color: var(--success-color);
+        }
 
-    .horizontal {
-        list-style: none;
-        display: flex;
-        flex-direction: row;
-        gap: var(--main-padding);
-    }
-    `;
+        .horizontal {
+            list-style: none;
+            display: flex;
+            flex-direction: row;
+            gap: var(--main-padding);
+        }
+        `
+    ];
 
     private addWord = (ev:Event) => {
         ev.preventDefault();
-        console.log("onAddWord:", this);
+        //console.log("onAddWord:", this);
         
         var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
         var result:HTMLElement = this.shadowRoot!.querySelector("#result-info")!;
