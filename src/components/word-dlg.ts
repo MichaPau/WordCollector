@@ -105,7 +105,7 @@ export class WordDialog extends LitElement {
                         `)}
                     </sl-select>
                 </div>
-                <sl-button type="submit" >Add</sl-button>
+                <sl-button type="submit" variant="primary">Add</sl-button>
                 <div id="result-info"></div>
             </form>
         `;

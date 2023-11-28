@@ -20,12 +20,13 @@ export class WordEdit extends LitElement {
       /* height: 100%; */
       /* width: 100%; */
       height: 100%;
+      --padding: 0;
       /* background-color: orange; */
     }
     #container {
       border: none;
       height: 100%;
-      border: 1px solid black;
+      /* border: 1px solid black; */
       box-sizing: border-box;
       //overflow: hidden;
       /* overflow-y: scroll; */
@@ -37,10 +38,9 @@ export class WordEdit extends LitElement {
       /* overflow-y: scroll; */
     }
     #word-edit {
-      padding: var(--main-padding);
+      /* padding: var(--main-padding);
       height: 100%;
-      /* background-color: orange; */
-      overflow: hidden;
+      overflow: hidden; */
     }
 
     .word-table {
@@ -62,7 +62,7 @@ export class WordEdit extends LitElement {
   render() {
     return html`
     <div id="container">
-        <sl-split-panel vertical position="50">
+        <sl-split-panel vertical position="100">
           <!-- <div slot="start">
             1
           </div>
@@ -70,10 +70,7 @@ export class WordEdit extends LitElement {
             <div id="word-list" slot="start">
               <word-table .words=${this.word_list} class="word-table"></word-table>
             </div>
-            <div id="word-edit" slot="end">
-              <word-dialog .lang_list=${this.lang_list} .type_list=${this.type_list}></word-dialog>
-                
-            </div>
+            <div id="word-edit" slot="end"></div>
         </sl-split-panel>
   </div>
     `;

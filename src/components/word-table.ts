@@ -14,6 +14,10 @@ export class WordTable extends LitElement {
     static styles = [
         resetStyles,
         css`
+        #table-container {
+            height: 100%;
+            overflow-y: auto;
+        }
         #word-table {
             width: 100%;
             border-collapse: collapse;
@@ -31,6 +35,7 @@ export class WordTable extends LitElement {
     
     render() {
         return html`
+        <div id="table-container">
             <table id="word-table">
                 <thead>
                 <tr>
@@ -50,6 +55,7 @@ export class WordTable extends LitElement {
                 })}
                 </tbody>
             </table>
+        </div>
         `;
     }
 }

@@ -12,5 +12,18 @@ export default css`
   :host *::after {
     box-sizing: inherit;
   }
+  
+  sl-button::part(base) {
+    background-color: var(--sl-color-primary-600);
+    border-color: var(--sl-color-primary-600);
+    color: var(--sl-color-neutral-0);
+  }
+
+  sl-button::part(base):hover {
+    background-color: var(--sl-color-primary-500);
+    border-color: var(--sl-color-primary-500);
+    color: var(--sl-color-neutral-0);
+  }
+
 
 `;

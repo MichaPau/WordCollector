@@ -8,7 +8,7 @@ import {AppController} from './controllers/mainController.js'
 
 import { Language, Table, Word, Type } from './app-types.js';
 
-import '@shoelace-style/shoelace/dist/themes/light.css';
+//import '@shoelace-style/shoelace/dist/themes/light.css';
 
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -20,6 +20,9 @@ import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
+import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
+
+import SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
 import resetStyles from './styles/default-component.styles.js';
 
@@ -40,6 +43,8 @@ export class MainApp extends LitElement {
       width: 100%;
       /* display: flex; */
       overflow: hidden;
+      border: 2px solid black;
+      padding: var(--main-padding);
       /* overflow-y: scroll; */
       
     }
@@ -63,8 +68,8 @@ export class MainApp extends LitElement {
     }
 
     #word-panel {
-      display: flex;
-      flex-direction: column;
+      /* display: flex;
+      flex-direction: column; */
       overflow: hidden;
       height: 100%;
       //background-color: orange;
@@ -74,6 +79,7 @@ export class MainApp extends LitElement {
     }
     sl-tab-group,
     sl-tab-panel,
+    sl-split-panel,
     sl-tab-panel::part(base),
     sl-tab-group::part(base),
     sl-tab-group::part(body) {
@@ -107,7 +113,7 @@ export class MainApp extends LitElement {
 
     word-edit {
       display: block;
-      /* height: 100%; */
+      height: 100%;
       overflow-y: auto;
     }
   `];
@@ -155,22 +161,19 @@ export class MainApp extends LitElement {
 
     this.addEventListener("on_add_language", this.addLanguageHandler);
     this.addEventListener("on_add_word", this.addWordHandler);
-    this.addEventListener("on_test_promise", this.testPromiseHandler);
+    this.addEventListener("openAddWordDlg", (ev:Event) => {
+      const drawer:SlDrawer = this.shadowRoot!.querySelector<SlDrawer>('#word-drawer')!;
+      drawer.show();
+    });
+    this.addEventListener("openAddLangDlg", (ev:Event) => {
+      const drawer:SlDrawer = this.shadowRoot!.querySelector<SlDrawer>('#lang-drawer')!;
+      drawer.show();
+    });
+    //this.addEventListener("on_test_promise", this.testPromiseHandler);
 
     //console.log(this.appCtr.getDBStatus());
   }
 
-  async testPromiseHandler(ev:Event) {
-    console.log("test promise handler");
-    let resolve =  (ev as CustomEvent).detail.resolve;
-    let reject =  (ev as CustomEvent).detail.reject;
-
-    let value = (ev as CustomEvent).detail.value;
-
-    if(value == "0") reject();
-    else resolve("foo");
-    
-  }
   async addLanguageHandler(ev:Event) {
   
     var l:Language = (ev as CustomEvent).detail.lang;
@@ -211,28 +214,35 @@ export class MainApp extends LitElement {
 
   render() {
     return html`
+    
       <div id="app-container">
-        <!-- <sl-split-panel id="split-panel" position="20">
-          <div id="left-pane" slot="start"></div> -->
-          <div id="right-pane" slot="end" class="border-check">
-          <!-- <word-edit .lang_list=${this.lang_list} .word_list=${this.word_list} class="full-height"></word-edit> -->
-            <sl-tab-group class="full-height">
+      <sl-drawer label="Word" placement="start" class="drawer-placement-bottom" id="word-drawer">
+        <word-dialog .lang_list=${this.lang_list} .type_list=${this.type_list}></word-dialog>
+      </sl-drawer>
+      <sl-drawer label="Language" placement="start" class="drawer-placement-bottom" id="lang-drawer">
+        <language-edit .lang_list=${this.lang_list}></language-edit>
+      </sl-drawer>
+        <sl-split-panel id="split-panel" position="20">
+          <div id="left-pane" slot="start"></div>
+          <div id="right-pane" slot="end">
+            <div class="panel-container">
+                <action-bar></action-bar>
+                <word-edit .lang_list=${this.lang_list} .word_list=${this.word_list} .type_list=${this.type_list}></word-edit>
+            </div>
+            <!-- <sl-tab-group class="full-height">
               <sl-tab slot="nav" panel="words">Words</sl-tab>
               <sl-tab slot="nav" panel="languages">Languages</sl-tab>
       
               <sl-tab-panel name="words" id="word-panel">
-                <div class="panel-container">
-                  <action-bar></action-bar>
-                  <word-edit .lang_list=${this.lang_list} .word_list=${this.word_list} .type_list=${this.type_list}></word-edit>
-                </div>
+                
                 
               </sl-tab-panel>
               <sl-tab-panel name="languages">
                 <language-edit .lang_list=${this.lang_list}></language-edit>
               </sl-tab-panel>
-            </sl-tab-group>
+            </sl-tab-group> -->
           </div>
-        <!-- </sl-split-panel> -->
+        </sl-split-panel>
         
       </div>
     `;
