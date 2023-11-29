@@ -101,7 +101,7 @@ export class MainApp extends LitElement {
     /* sl-tab-panel, sl-tab-group, sl-split-panel {
      
       height: 100%;
-    }
+    }*/
     
     sl-tab-group::part(base),
     sl-tab-group::part(body),
@@ -109,7 +109,7 @@ export class MainApp extends LitElement {
     sl-tab-panel::part(body),
     sl-tab-panel {
       height: 100%;
-    } */
+    } 
 
     word-edit {
       display: block;

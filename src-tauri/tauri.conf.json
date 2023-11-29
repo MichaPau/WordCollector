@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "WordCollector",
-    "version": "0.0.0"
+    "version": "0.1.1"
   },
   "tauri": {
     "allowlist": {
@@ -37,9 +37,9 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "wordcollector",
-        "width": 800,
-        "height": 600
+        "title": "WordCollector",
+        "width": 1000,
+        "height": 614
       }
     ]
   }

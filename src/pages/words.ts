@@ -62,16 +62,13 @@ export class WordEdit extends LitElement {
   render() {
     return html`
     <div id="container">
-        <sl-split-panel vertical position="100">
-          <!-- <div slot="start">
-            1
-          </div>
-          <div slot="end">2</div> -->
+    <word-table .words=${this.word_list} class="word-table"></word-table>
+        <!-- <sl-split-panel vertical position="90">
             <div id="word-list" slot="start">
-              <word-table .words=${this.word_list} class="word-table"></word-table>
+              
             </div>
             <div id="word-edit" slot="end"></div>
-        </sl-split-panel>
+        </sl-split-panel> -->
   </div>
     `;
   }
