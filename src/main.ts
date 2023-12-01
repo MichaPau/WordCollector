@@ -42,14 +42,15 @@ export class MainApp extends LitElement {
       height: 100%;
       width: 100%;
       /* display: flex; */
-      overflow: hidden;
+      /* overflow: hidden; */
       border: 2px solid black;
       padding: var(--main-padding);
       /* overflow-y: scroll; */
       
     }
     #split-panel {
-      /* height: 100%; */
+      height: 100%;
+      max-height: 100%;
       width: 100%;
     }
    
@@ -63,6 +64,9 @@ export class MainApp extends LitElement {
       grid-row: 1;*/
       padding: var(--main-padding);
       height: 100%;
+      max-height: 100%;
+      overflow: hidden;
+     
       /* box-sizing: border-box; */
       //overflow: scroll;
     }
@@ -77,23 +81,29 @@ export class MainApp extends LitElement {
     .border-check {
       border: 2px solid black;
     }
-    sl-tab-group,
+    /* sl-tab-group,
     sl-tab-panel,
     sl-split-panel,
+    sl-split-panel::part(panel),
     sl-tab-panel::part(base),
     sl-tab-group::part(base),
     sl-tab-group::part(body) {
       height: 100%;
+      max-height:100%;
       --padding: 0;
-    }
+    } */
 
     .panel-container {
-      display: flex;
-      flex-direction: column;
+
+      display: grid;
+      grid-template-rows: 3em 1fr;
       gap: var(--main-padding);
       padding-top: var(--main-padding);
       height: 100%;
-      align-content: stretch;
+      max-height: 100%;
+      overflow: hidden;
+      
+      /* border: 1px solid red; */
     }
     .full-height {
       height: 100%;
@@ -103,18 +113,19 @@ export class MainApp extends LitElement {
       height: 100%;
     }*/
     
-    sl-tab-group::part(base),
-    sl-tab-group::part(body),
-    sl-tab-panel::part(base),
-    sl-tab-panel::part(body),
-    sl-tab-panel {
-      height: 100%;
-    } 
 
+    action-bar {
+      /* display: block; */
+      flex: 0 0 3em;
+    }
     word-edit {
       display: block;
-      height: 100%;
-      overflow-y: auto;
+      //height: 100%;
+      min-height: 0;
+      /* overflow-y: auto; */
+    }
+    sl-drawer {
+      --size: 50%;
     }
   `];
 
@@ -216,11 +227,12 @@ export class MainApp extends LitElement {
     return html`
     
       <div id="app-container">
-      <sl-drawer label="Word" placement="start" class="drawer-placement-bottom" id="word-drawer">
+      <sl-drawer label="Add a new word:" placement="start" class="drawer-placement-bottom" id="word-drawer">
         <word-dialog .lang_list=${this.lang_list} .type_list=${this.type_list}></word-dialog>
       </sl-drawer>
-      <sl-drawer label="Language" placement="start" class="drawer-placement-bottom" id="lang-drawer">
-        <language-edit .lang_list=${this.lang_list}></language-edit>
+      <sl-drawer label="Language settings:" placement="start" class="drawer-placement-bottom" id="lang-drawer">
+        <!-- <language-edit .lang_list=${this.lang_list}></language-edit> -->
+        <lang-dialog .lang_list=${this.lang_list}></lang-dialog>
       </sl-drawer>
         <sl-split-panel id="split-panel" position="20">
           <div id="left-pane" slot="start"></div>

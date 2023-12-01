@@ -12,6 +12,12 @@ export default css`
   :host *::after {
     box-sizing: inherit;
   }
+  ul, ul li {
+    list-style-type: none;
+    margin:0;
+    padding: 0;
+    text-indent: 0;
+  }
   
   /* sl-button::part(base) {
     background-color: var(--sl-color-primary-600);

@@ -40,6 +40,18 @@ export class WordDialog extends LitElement {
             flex-direction: row;
             gap: var(--main-padding);
         }
+
+        .horizontal > * {
+            flex: 1 1 50%;
+        }
+
+        .submit-button {
+            margin-top: 1rem;
+            margin-bottom: 1em;
+        }
+        .invisible {
+            display: none;
+        }
         `
     ];
 
@@ -91,21 +103,21 @@ export class WordDialog extends LitElement {
     render() {
         return html`
             <form id="word-form" >
-                <label>Add a new word</label>
+                <label class="invisible">Add a new word:</label>
                 <sl-input name="word-input" label="Word:" required spellcheck="false"></sl-input>
                 <div class="horizontal">
                     <sl-select name="word-lang" label="Language" required>
                         ${this.lang_list.map((lang) => html`
-                            <sl-option value="${lang.title!}">${lang.token}</sl-option>
+                            <sl-option value="${lang.title!}">${lang.title}</sl-option>
                         `)}
                     </sl-select>
                     <sl-select name="word-type" label="Type" required>
                         ${this.type_list.map((type) => html`
-                            <sl-option value="${type.title!}">${type.token}</sl-option>
+                            <sl-option value="${type.title!}">${type.title}</sl-option>
                         `)}
                     </sl-select>
                 </div>
-                <sl-button type="submit" variant="primary">Add</sl-button>
+                <sl-button type="submit" variant="primary" class="submit-button">Add</sl-button>
                 <div id="result-info"></div>
             </form>
         `;

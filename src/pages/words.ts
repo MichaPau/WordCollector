@@ -16,31 +16,16 @@ export class WordEdit extends LitElement {
     resetStyles,
     css`
 
-    sl-split-panel {
-      /* height: 100%; */
-      /* width: 100%; */
+    :host {
       height: 100%;
-      --padding: 0;
-      /* background-color: orange; */
     }
     #container {
       border: none;
+      /* border: 1px solid red; */
       height: 100%;
       /* border: 1px solid black; */
       box-sizing: border-box;
-      //overflow: hidden;
-      /* overflow-y: scroll; */
-      /* background-color: orange; */
-    }
-    #word-list {
-      padding: var(--main-padding);
-      overflow: hidden;
-      /* overflow-y: scroll; */
-    }
-    #word-edit {
-      /* padding: var(--main-padding);
-      height: 100%;
-      overflow: hidden; */
+      
     }
 
     .word-table {
@@ -62,7 +47,7 @@ export class WordEdit extends LitElement {
   render() {
     return html`
     <div id="container">
-    <word-table .words=${this.word_list} class="word-table"></word-table>
+      <word-table .words=${this.word_list} class="word-table"></word-table>
         <!-- <sl-split-panel vertical position="90">
             <div id="word-list" slot="start">
               

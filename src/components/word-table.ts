@@ -31,24 +31,67 @@ export class WordTable extends LitElement {
     static styles = [
         resetStyles,
         css`
-        #table-container {
+        /* :host {
             height: 100%;
-            overflow-y: auto;
+            overflow: hidden;
+            
+        } */
+        #table-container {
+            max-height: 100%;
+            height: 100%;
+           
+            overflow-y: scroll;
         }
         #word-table {
             width: 100%;
-            border-collapse: collapse;
+            height: 100%;
+            /* height:100%; */
+            /* table-layout: fixed; */
+            /* display: block; */
+            border-collapse: separate;
+           //border-collapse: separate;
+            border-spacing: 0;
+            overflow-y: scroll;
         }
-        td, th {
-            border: 1px solid #999;
+        thead {
+            position: sticky;
+            inset-block-start: 0;
+            background-color: var(--sl-color-sky-600);
+            color: white;
+            border: 1px solid white;
+        }
+        th {
+            /* position: sticky;
+            top: 0;
+            background-color: var(--sl-color-sky-600);
+            color: white;
+            border: 1px solid white; */
+            border-right: 1px solid white;
+            /* border-bottom: 1px solid white; */
+            padding: 0.25rem;
+            text-align: left;
+            
+        }
+        td {
+            border-left: 1px solid var(--sl-color-orange-400);
+            border-bottom: 1px solid var(--sl-color-orange-400);
+
             padding: 0.25rem;
             text-align: left;
         }
 
+        td:last-of-type {
+            border-right: 1px solid var(--sl-color-orange-400);
+        }
         tbody tr:nth-child(odd) {
             background: #eee;
         }
-
+        tbody {
+            /* position: relative; */
+            /* top: 1em;
+            overflow: auto; */
+            z-index: -1;
+        }
         .action-column {
             display: flex;
             gap: var(--main-padding);
@@ -93,14 +136,19 @@ export class WordTable extends LitElement {
     }
     render() {
         return html`
-        <sl-dialog label="Delete ${this.deleteWord?.word}" id="close-dialog">
-            Are you sure to delete ${this.deleteWord?.word}
-            <div class="dialog-buttons" slot="footer">
-                <sl-button variant="warning" id="delete-btn">Delete</sl-button>
-                <sl-button variant="primary" id="cancel-btn">Cancel</sl-button>
-            </div>
-        </sl-dialog>
+        
         <div id="table-container">
+        <!-- ${this.words.map((word:Word) => {
+                return html`<div style="height: 3em;">${word.word}</div>`
+            })
+        } -->
+            <sl-dialog label="Delete ${this.deleteWord?.word}" id="close-dialog">
+                Are you sure to delete ${this.deleteWord?.word}
+                <div class="dialog-buttons" slot="footer">
+                    <sl-button variant="warning" id="delete-btn">Delete</sl-button>
+                    <sl-button variant="primary" id="cancel-btn">Cancel</sl-button>
+                </div>
+            </sl-dialog> 
             <table id="word-table">
                 <thead>
                 <tr>
@@ -115,11 +163,16 @@ export class WordTable extends LitElement {
                             <td>${word.word}</td>
                             <td>${word.language}</td>
                             <td>${word.type}</td>
-                            <td class="action-column">
-                                <sl-tooltip content="Delete ${word.word}">
-                                    <sl-icon-button name="trash" label="DDelete ${word.word}" @click=${ (ev:Event) => this.confirmDeleteWord(ev, word)}></sl-icon-button>
-                                </sl-tooltip>
+                            <td>
+                                <div class="action-column">
+                                    <sl-tooltip content="Delete ${word.word}">
+                                        <sl-icon-button name="trash" label="Delete ${word.word}" @click=${ (ev:Event) => this.confirmDeleteWord(ev, word)}></sl-icon-button>
+                                    </sl-tooltip>
+                                </div>
                             </td>
+                                
+                                
+                            
                         </tr>
                     `
                 })}

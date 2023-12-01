@@ -21,9 +21,7 @@ export class LanguageEdit extends LitElement {
 
   render() {
     return html`
-    <ul class="horizontal">
-        ${this.lang_list.map((lang) => html`<li>${lang.token}</li>`)}
-    </ul>
+    
     <lang-dialog .lang_list=${this.lang_list}></lang-dialog>
    
     `;
