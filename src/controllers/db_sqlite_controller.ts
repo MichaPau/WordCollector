@@ -7,7 +7,7 @@ import { Table, Word, Language, Type } from "../app-types";
 
 
 
-export class AppController implements ReactiveController{
+export class DBSQLiteController implements ReactiveController{
     
     private host: ReactiveControllerHost;
     private db!:Database;
