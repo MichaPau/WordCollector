@@ -2,6 +2,7 @@ import { LitElement, html, css, PropertyValueMap, nothing } from 'lit';
 import { customElement, property, state, query} from 'lit/decorators.js';
 import { Language, deferred } from '../app-types';
 
+import * as event_types from '../controllers/event_controller.js';
 import resetStyles from '../styles/default-component.styles.js';
 
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
@@ -116,9 +117,9 @@ export class LanguageDialog extends LitElement {
         };
     
         if(this.mode === "Add")
-            this.dispatchEvent(new CustomEvent("on_add_language", options));
+            this.dispatchEvent(new CustomEvent(event_types.ADD_LANGUAGE, options));
         else if(this.mode === "Update")
-            this.dispatchEvent(new CustomEvent("on_add_language", options));
+            this.dispatchEvent(new CustomEvent(event_types.UPDATE_LANGUAGE, options));
         else {
             result.className = "error";
             result.innerHTML = "Something went wrong - cannot fix..";

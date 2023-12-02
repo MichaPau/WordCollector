@@ -25,7 +25,8 @@ export interface Type {
 export interface Word {
     word_id?:number,
     word:string,
-    language: string,
+    language: number,
+    language_title?: string,
     type: string,
     created_at?: Date,
     last_used?: Date,
