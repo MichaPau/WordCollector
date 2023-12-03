@@ -1,9 +1,9 @@
 import { LitElement, ReactiveController, ReactiveControllerHost } from "lit";
 
-import Database, { QueryResult } from "tauri-plugin-sql-api";
+import Database from "tauri-plugin-sql-api";
 
 
-import { Table, Word, Language, Type } from "../app-types";
+import { Word, Language } from "../app-types";
 
 
 
@@ -14,19 +14,17 @@ export class DBSQLiteController implements ReactiveController{
 
     constructor(host: ReactiveControllerHost & LitElement) {
         this.host = host;
-        
-        host.addController(this);
-        
+        this.host.addController(this);
     }
 
-  
     hostConnected(): void {
         console.log("AppController connected");
         //this.connectDB();
         
     }
     hostDisconnected(): void {
-        this.db.close();
+        if(this.db)
+            this.db.close();
     }
 
     async connectDB() {
@@ -72,9 +70,32 @@ export class DBSQLiteController implements ReactiveController{
         }
     }
     
+    async updateWord(item:Word) {
+        const q = "UPDATE word SET word = $1, language = $2, type = $3 WHERE word_id = $4";
 
+        try {
+            let result = await this.db.execute(q, [item.word, item.language, item.type, item.word_id]);
+            console.log("Update word result:", result);
+            return result;
+        } catch (e) {
+            throw(e);
+        }
+    }
+
+    async deleteWord(item:Word) {
+        //delete in translations, definitions, collections etc.
+        const q = "DELETE FROM word WHERE word_id = $1";
+        try {
+            let result = await this.db.execute(q, [item.word_id]);
+            return result;
+        } catch(e) {
+            throw(e);
+        }
+
+    }
     
     async addLanguage(item:Language) {
+       
         const q = "INSERT INTO language (token, title, title_native) VALUES ($1, $2, $3)";
         try {
             let result = await this.db.execute(q, [item.token, item.title, item.title_native]);
@@ -84,16 +105,32 @@ export class DBSQLiteController implements ReactiveController{
         }
     }
 
-    async DELETE_LANGUAGE(item:Language) {
-        const checkQuery = "SELECT COUNT(*) as count FROM word WHERE word = $1 AND language = $2 AND type = $3";
+    async deleteLanguage(item:Language) {
+        const checkQuery = "SELECT COUNT(*) as count FROM word WHERE language = $1";
+        let check:Array<{count: number}> = await this.checkQuery(checkQuery, [item.lang_id!]);
 
-        const q = "DELETE FROM language WHERE lang_id = $1";
+        if(check[0].count > 0) {
+            throw new Error(`Can't delete ${item.title} reason: used by words`);
+        } else {
+            const q = "DELETE FROM language WHERE lang_id = $1";
+            try {
+                let result = await this.db.execute(q, [item.lang_id]);
+                return result;
+            } catch(e) {
+                throw(e);
+            }
+        }
+    }
+
+    async updateLanguage(item:Language) {
+        const q = "UPDATE language SET token = $1,  title = $2, title_native = $3 WHERE lang_id = $4";
+
         try {
-            let result = await this.db.execute(q, [item.lang_id]);
+            let result = await this.db.execute(q, [item.token, item.title, item.title_native, item.lang_id]);
+            console.log(result);
             return result;
-        } catch(e) {
+        } catch (e) {
             throw(e);
         }
-
     }
 }

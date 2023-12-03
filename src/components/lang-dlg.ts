@@ -1,20 +1,29 @@
 import { LitElement, html, css, PropertyValueMap, nothing } from 'lit';
 import { customElement, property, state, query} from 'lit/decorators.js';
-import { Language, deferred } from '../app-types';
+import { DBEventOptionsItem, DrawerItem, Language, deferred } from '../app-types';
 
 import * as event_types from '../controllers/event_controller.js';
+import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
+
 import resetStyles from '../styles/default-component.styles.js';
 
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
+import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.component.js';
 
 @customElement('lang-dialog')
-export class LanguageDialog extends LitElement {
+export class LanguageDialog extends LitElement implements DrawerItem{
 
     @property({type: Array})
     lang_list: Array<Language> = [];
 
     @state()
     mode: "Update" | "Add" = "Add";
+
+    @state()
+    deleteItem?:Language;
+
+    @query("#lang_id")
+    lang_id?:SlInput;
 
     @query("#lang_token")
     lang_token?:SlInput;
@@ -24,6 +33,9 @@ export class LanguageDialog extends LitElement {
 
     @query("#lang_title_native")
     lang_title_native?:SlInput;
+
+    @query('#delete-dialog')
+    deleteDialog?:SlDialog;
 
     static styles = [
     
@@ -35,13 +47,7 @@ export class LanguageDialog extends LitElement {
         flex-direction: column;
         gap: var(--main-padding);
     }
-    .error {
-        color: var(--error-color);
-    }
-
-    .success {
-        color: var(--success-color);
-    }
+    
     .short {
         width: clamp(3em, 40%, 10em);
     }
@@ -80,6 +86,14 @@ export class LanguageDialog extends LitElement {
     }
     `];
 
+    closeAction() {
+        var form:HTMLFormElement = this.shadowRoot!.querySelector("#lang-form")!;
+        form.reset();
+
+        var result:HTMLElement = this.shadowRoot!.querySelector("#result-info")!;
+        result.innerHTML = "";
+
+    }
     private addLanguage = (ev:Event) => {
         ev.preventDefault();
         //console.log("onAddWord:", this);
@@ -90,19 +104,31 @@ export class LanguageDialog extends LitElement {
         
         const formData = new FormData(form!);
         const formObj = Object.fromEntries(formData.entries());
+        console.log(formObj);
         var lang:Language = {
             "token": formObj.token as string, 
             "title": formObj.title as string, 
             "title_native": formObj.title_native as string
         };
     
+        let result_msg = "";
+        if(this.mode === 'Add') {
+            result_msg = " added.";
+        } else {
+            result_msg = " updated.";
+            lang.lang_id = parseInt(formObj.id as string); 
+        }
+        
+        // console.log("form_id:", formObj.id as string)
+        // console.log("lang_id:", lang.lang_id);
+
         const {promise, resolve, reject} = deferred<string>();
         promise
         .then((value) => {
             console.log("Promise resolved:",value);
             form.reset();
             result.className = "success";
-            result.innerHTML = lang.title + " added.";
+            result.innerHTML = lang.title + result_msg;
         })
         .catch((e) => { 
             console.log("Promise rejected:", e);
@@ -110,8 +136,8 @@ export class LanguageDialog extends LitElement {
             result.innerHTML = "Error: "+e;
         });
     
-        const options = {
-            detail: {"resolve": resolve, "reject": reject, "lang": lang},
+        const options:DBEventOptionsItem = {
+            detail: {"resolve": resolve, "reject": reject, "item": lang},
             bubbles: true,
             composed: true
         };
@@ -146,20 +172,66 @@ export class LanguageDialog extends LitElement {
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
         var form:HTMLFormElement = this.shadowRoot!.querySelector("#lang-form")!;
         form.addEventListener("submit", this.addLanguage);
+
+        this.deleteDialog?.addEventListener("sl-request-close", () => {
+            const deleteResult = this.deleteDialog?.querySelector("#delete-result")!;
+            deleteResult.innerHTML = "";
+            console.log("Delete dialog request close");
+            this.deleteItem = undefined;
+            
+        });
     }
 
-    confirmDeleteLang(ev:Event, lang: Language) {
-
+    confirmDeleteLang(lang: Language) {
+        const deleteResult = this.deleteDialog?.querySelector("#delete-result")!;
+        deleteResult.innerHTML = "";
+        this.deleteItem = lang;
+        this.deleteDialog?.show();
     }
+    cancelDelete() {
+        this.deleteItem = undefined;
+        this.deleteDialog?.hide();
+    }
+    async executeDelete() {
+        const deleteResult = this.deleteDialog?.querySelector("#delete-result")!;
+       //console.log(deleteResult);
+        const {promise, resolve, reject} = deferred<string>();
+        promise
+        .then((value) => {
+            console.log("Promise resolved:",value);
+            deleteResult.className = "success";
+            deleteResult.innerHTML = this.deleteItem?.title + " deleted.";
 
+            setTimeout(() => {
+                this.deleteItem = undefined;
+                deleteResult.innerHTML = "";
+                this.deleteDialog?.hide();
+            }, CLOSE_TIMEOUT_MS);
+            
+        })
+        .catch((e) => { 
+            console.log("Promise rejected:", e);
+            deleteResult.className = "error";
+            deleteResult.innerHTML = e;
+        });
+    
+        const options:DBEventOptionsItem = {
+            detail: {"resolve": resolve, "reject": reject, "item": this.deleteItem!},
+            bubbles: true,
+            composed: true
+        };
+        this.dispatchEvent(new CustomEvent(event_types.DELETE_LANGUAGE, options));
+    }
     resetForm () {
         this.mode = "Add";
+        this.lang_id!.value = "";
         this.lang_token!.value = "";
         this.lang_title!.value = "";
         this.lang_title_native!.value = "";
     }
-    selectUpdateLang(ev:Event, lang: Language) {
+    selectUpdateLang(lang: Language) {
         this.mode = "Update";
+        this.lang_id!.value = lang.lang_id!.toString();
         this.lang_token!.value = lang.token;
         this.lang_title!.value = lang.title;
         if(lang.title_native)
@@ -169,23 +241,39 @@ export class LanguageDialog extends LitElement {
     }
     render() {
         return html`
+            <sl-dialog label="Delete ${this.deleteItem?.title}" id="delete-dialog">
+                <div class="center-text">
+                    Are you sure to delete <span class="bold-style">${this.deleteItem?.token} - ${this.deleteItem?.title}</span><br/>
+                    (Can only be deleted when not associated with any word in the database).
+                </div>
+                <div class="dialog-buttons" slot="footer">
+                    <sl-button variant="default" id="cancel-btn" @click=${this.cancelDelete}>Cancel</sl-button>
+                    <sl-button variant="warning" id="delete-btn" @click=${this.executeDelete}>Delete</sl-button>
+                </div>
+                <div id="delete-result"></div>
+            </sl-dialog> 
             <ul class="token-list">
                 ${this.lang_list.map((lang) => html`
                     <li>
                         <div class="token-container">
-                            <div class="token-style">${lang.token}</div>
-                            <sl-tooltip content="Delete ${lang.title}">
-                                <sl-icon-button name="trash" label="Delete ${lang.title}" @click=${ (ev:Event) => this.confirmDeleteLang(ev, lang)}></sl-icon-button>
+                            <sl-tooltip content="${lang.token} - ${lang.title}">
+                                <div class="token-style">${lang.token}</div>
                             </sl-tooltip>
                             <sl-tooltip content="Update ${lang.title}">
-                                <sl-icon-button name="vector-pen" label="Update ${lang.title}" @click=${ (ev:Event) => this.selectUpdateLang(ev, lang)}></sl-icon-button>
+                                <sl-icon-button name="vector-pen" label="Update ${lang.title}" @click=${ () => this.selectUpdateLang(lang)}></sl-icon-button>
                             </sl-tooltip>
+                            <sl-tooltip content="Delete ${lang.title}">
+                                <sl-icon-button name="trash" label="Delete ${lang.title}" @click=${ () => this.confirmDeleteLang(lang)}></sl-icon-button>
+                            </sl-tooltip>
+                            
                         </div>
                     </li>
                 `)}
             </ul>
             <form id="lang-form" >
                 <label class="invisible">Add a new language</label>
+                
+                <sl-input id="lang_id" name="id" label="ID:" class="short hidden" readonly></sl-input>
                 <label for="lang_token">
                     Token (en/fr/it etc.): *
                     <sl-input id="lang_token" name="token" class="short" required @input=${this.checkToken}></sl-input>

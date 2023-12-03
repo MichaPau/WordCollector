@@ -33,6 +33,19 @@ export interface Word {
 
 }
 
+export interface DBEventOptionsItem  {
+  detail: {
+    "resolve": (value: any | PromiseLike<any>) => void,
+    "reject": (reason?: any) => void,
+    "item": Word | Language
+  },
+  bubbles?: boolean,
+  composed?: boolean 
+}
+
+export interface DrawerItem extends Element{
+  closeAction():void;
+}
 export const deferred = <T>() => {
     let resolve!: (value: T | PromiseLike<T>) => void;
     let reject!: (reason?: any) => void;

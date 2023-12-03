@@ -1,7 +1,7 @@
-import {html, css, LitElement, PropertyValueMap} from 'lit';
+import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
-import { Language, Word, Type, deferred} from './../app-types.js';
+import { Language, Word, Type} from './../app-types.js';
 
 import resetStyles from '../styles/default-component.styles.js';
 
@@ -47,7 +47,7 @@ export class WordEdit extends LitElement {
   render() {
     return html`
     <div id="container">
-      <word-table .words=${this.word_list} class="word-table"></word-table>
+      <word-table .words=${this.word_list} .lang_list=${this.lang_list} .type_list=${this.type_list} class="word-table"></word-table>
         <!-- <sl-split-panel vertical position="90">
             <div id="word-list" slot="start">
               

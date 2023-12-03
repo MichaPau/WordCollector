@@ -4,9 +4,10 @@ import {html, css, LitElement} from 'lit';
 
 import {customElement, property, state} from 'lit/decorators.js';
 
-import {AppController} from './controllers/mainController.js'
+import {DBSQLiteController} from './controllers/db_sqlite_controller.js';
+import {AppEventController} from './controllers/event_controller.js';
 
-import { Language, Table, Word, Type } from './app-types.js';
+import { Language, Table, Word, Type, DrawerItem } from './app-types.js';
 
 //import '@shoelace-style/shoelace/dist/themes/light.css';
 
@@ -131,7 +132,8 @@ export class MainApp extends LitElement {
 
     
 
-  private dbCtr = new AppController(this);
+  public dbCtr = new DBSQLiteController(this);
+  private eventCtr = new AppEventController(this);
 
   @property()
   info = 'nothing here';
@@ -148,6 +150,9 @@ export class MainApp extends LitElement {
   @state()
   type_list:Array<Type> = [];
 
+  @state()
+  testState = 0;
+
   
 
 
@@ -162,21 +167,20 @@ export class MainApp extends LitElement {
     super.connectedCallback();
     
     await this.dbCtr.connectDB();
-    //this.word_list = await this.dbCtr.getWords();
-    //this.lang_list = await this.dbCtr.getLanguages();
-    //this.type_list = await this.dbCtr.getTypes();
 
-    this.word_list = await this.dbCtr.selectAll("word");
+    //this.word_list = await this.dbCtr.selectAll("word");
+    this.word_list = await this.dbCtr.selectAllWords();
     this.lang_list = await this.dbCtr.selectAll("language");
     this.type_list = await this.dbCtr.selectAll("word_type");
 
-    this.addEventListener("on_add_language", this.addLanguageHandler);
-    this.addEventListener("on_add_word", this.addWordHandler);
-    this.addEventListener("openAddWordDlg", (ev:Event) => {
+    //this.addEventListener("on_add_language", this.addLanguageHandler);
+    //this.addEventListener("on_add_word", this.addWordHandler);
+    
+    this.addEventListener("openAddWordDlg", () => {
       const drawer:SlDrawer = this.shadowRoot!.querySelector<SlDrawer>('#word-drawer')!;
       drawer.show();
     });
-    this.addEventListener("openAddLangDlg", (ev:Event) => {
+    this.addEventListener("openAddLangDlg", () => {
       const drawer:SlDrawer = this.shadowRoot!.querySelector<SlDrawer>('#lang-drawer')!;
       drawer.show();
     });
@@ -184,58 +188,26 @@ export class MainApp extends LitElement {
 
     //console.log(this.appCtr.getDBStatus());
   }
-
-  async addLanguageHandler(ev:Event) {
   
-    var l:Language = (ev as CustomEvent).detail.lang;
-    await this.dbCtr.addLanguage(l).then((result) => {
-      let resolve =  (ev as CustomEvent).detail.resolve;
-      resolve("success");
-      (async () => {
-        this.lang_list = await this.dbCtr.selectAll('language');
-      })();
-      
-    })
-    .catch((e) => {
-      let reject =  (ev as CustomEvent).detail.reject;
-      reject(e);
-    });
-  }
-  async addWordHandler(ev:Event) {
-  
-    var w:Word = (ev as CustomEvent).detail.word;
-    await this.dbCtr.addWord(w).then((result) => {
-      let resolve =  (ev as CustomEvent).detail.resolve;
-      resolve("success");
-      (async () => {
-        //this.word_list = await this.dbCtr.getWords();
-        this.word_list = await this.dbCtr.selectAll("word");
-      })();
-      
-    })
-    .catch((e) => {
-      let reject =  (ev as CustomEvent).detail.reject;
-      reject(e);
-    });
 
-    
-    
-    
-  }
+  onDrawerClose(ev:Event) {
+    console.log("onDrawerClose");
+    const dialog:DrawerItem = (ev.currentTarget as SlDrawer).firstElementChild! as DrawerItem;
+    dialog.closeAction();
 
+  }
   render() {
     return html`
     
       <div id="app-container">
-      <sl-drawer label="Add a new word:" placement="start" class="drawer-placement-bottom" id="word-drawer">
-        <word-dialog .lang_list=${this.lang_list} .type_list=${this.type_list}></word-dialog>
+      <sl-drawer label="Add a new word:" placement="start" class="drawer-placement-bottom" id="word-drawer" @sl-request-close=${this.onDrawerClose}>
+        <word-dialog .lang_list=${this.lang_list} .type_list=${this.type_list} mode="Add"></word-dialog>
       </sl-drawer>
-      <sl-drawer label="Language settings:" placement="start" class="drawer-placement-bottom" id="lang-drawer">
-        <!-- <language-edit .lang_list=${this.lang_list}></language-edit> -->
+      <sl-drawer label="Language settings:" placement="start" class="drawer-placement-bottom" id="lang-drawer" @sl-request-close=${this.onDrawerClose}>
         <lang-dialog .lang_list=${this.lang_list}></lang-dialog>
       </sl-drawer>
         <sl-split-panel id="split-panel" position="20">
-          <div id="left-pane" slot="start"></div>
+          <div id="left-pane" slot="start">${this.testState}</div>
           <div id="right-pane" slot="end">
             <div class="panel-container">
                 <action-bar></action-bar>

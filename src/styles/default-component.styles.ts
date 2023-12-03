@@ -18,7 +18,24 @@ export default css`
     padding: 0;
     text-indent: 0;
   }
-  
+
+  .error {
+        color: var(--error-color);
+  }
+
+  .success {
+      color: var(--success-color);
+  }
+  .center-text {
+    text-align: center;
+  }
+  .bold-style {
+    font-weight: 700;
+  }
+  .hidden {
+    visibility: hidden;
+    height: 0;
+  }
   /* sl-button::part(base) {
     background-color: var(--sl-color-primary-600);
     border-color: var(--sl-color-primary-600);
