@@ -45,6 +45,15 @@ export class DBSQLiteController implements ReactiveController{
         let result = await this.db.select<Array<T>>(q);
         return result;
     }
+
+    async searchForWords(value:string):Promise<Array<Word>> {
+       
+        //const q = "SELECT * from word WHERE word LIKE '% $1 %'";
+        const q = `SELECT * from word WHERE word LIKE '%${value}%' `;
+        let result = await this.db.select(q, [value]);
+        
+        return result as Array<Word>;
+    }
     async checkQuery<T>(q:string, values:Array<string | number>):Promise<T> {
         let result = await this.db.select(q, values);
         return result as T;
