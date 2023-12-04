@@ -25,7 +25,7 @@ import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
 
 import SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
-import resetStyles from './styles/default-component.styles.js';
+import compStyles from './styles/default-component.styles.js';
 
 import './pages/language-edit.js';
 import './pages/words.js';
@@ -37,7 +37,7 @@ import './components/action-bar.js';
 export class MainApp extends LitElement {
 
   static styles = [
-    resetStyles,
+    compStyles,
     css`
     #app-container {
       height: 100%;

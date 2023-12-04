@@ -5,7 +5,7 @@ import { DrawerItem, Language, Type, Word, deferred, DBEventOptionsItem } from '
 import * as event_types from '../controllers/event_controller.js';
 
 import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
-import resetStyles from '../styles/default-component.styles.js';
+import compStyles from '../styles/default-component.styles.js';
 
 @customElement('word-dialog')
 export class WordDialog extends LitElement implements DrawerItem {
@@ -22,9 +22,6 @@ export class WordDialog extends LitElement implements DrawerItem {
         word: "",
         language: 0,
         type: ""
-
-
-
     };
 
     @property()
@@ -32,7 +29,7 @@ export class WordDialog extends LitElement implements DrawerItem {
 
     static styles = [
     
-        resetStyles,
+        compStyles,
         css`
 
         #word-form {
@@ -69,11 +66,12 @@ export class WordDialog extends LitElement implements DrawerItem {
         `
     ];
 
-    closeAction() {
+    async closeAction():Promise<void> {
         var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
         form.reset();
         var result:HTMLElement = this.shadowRoot!.querySelector("#result-info")!;
         result.innerHTML = "";
+        return undefined;
     }
     private addWord = (ev:Event) => {
         ev.preventDefault();

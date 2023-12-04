@@ -4,6 +4,8 @@ import { Language, Word } from "../app-types";
 import { QueryResult } from "tauri-plugin-sql-api";
 
 export const testEvent = "TEST_EVENT";
+
+export const SELECT_ALL = "SELECT_ALL";
 export const ADD_LANGUAGE = "ADD_LANGUAGE";
 export const UPDATE_LANGUAGE = "UPDATE_LANGUAGE";
 export const DELETE_LANGUAGE = "DELETE_LANGUAGE ";
@@ -32,6 +34,8 @@ export class AppEventController implements ReactiveController {
     hostConnected(): void {
         this.host.addEventListener(testEvent, this.onTestEvent);
         
+        this.host.addEventListener(SELECT_ALL, this.onSelectAll);
+
         this.host.addEventListener(SEARCH_WORDS, this.onSearchWords);
         this.host.addEventListener(RESET_SEARCH_WORDS, this.onResetSearchWords);
 
@@ -46,6 +50,8 @@ export class AppEventController implements ReactiveController {
     hostDisconnected(): void {
         this.host.removeEventListener(testEvent, this.onTestEvent);
         
+        this.host.removeEventListener(SELECT_ALL, this.onSelectAll);
+
         this.host.removeEventListener(SEARCH_WORDS, this.onSearchWords);
         this.host.removeEventListener(RESET_SEARCH_WORDS, this.onResetSearchWords);
 
@@ -70,6 +76,20 @@ export class AppEventController implements ReactiveController {
     }
     onResetSearchWords = async() => {
         this.host.word_list = await this.host.dbCtr.selectAllWords();
+    }
+
+    onSelectAll = async (ev:Event) => {
+        let table = (ev as CustomEvent).detail.table;
+        let value = (ev as CustomEvent).detail.value;
+        await this.host.dbCtr.selectAll(table, "for_word_id", value)
+        .then((result) => {
+            let resolve =  (ev as CustomEvent).detail.resolve;
+            resolve(result);
+        })
+        .catch((e) => {
+            let reject =  (ev as CustomEvent).detail.reject;
+            reject(e);
+        });
     }
     onAddWord = async (ev:Event) => {
         await this.wordActionWithPromise(this.host.dbCtr.addWord, ev)

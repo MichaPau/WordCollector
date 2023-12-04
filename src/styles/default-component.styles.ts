@@ -36,6 +36,10 @@ export default css`
     visibility: hidden;
     height: 0;
   }
+
+  sl-drawer::part(panel) {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
   /* sl-button::part(base) {
     background-color: var(--sl-color-primary-600);
     border-color: var(--sl-color-primary-600);

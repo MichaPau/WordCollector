@@ -3,7 +3,7 @@ import { customElement, property, state, query} from 'lit/decorators.js';
 
 import { DBEventOptionsItem, DrawerItem, Language, Type, Word, deferred } from '../app-types';
 
-import resetStyles from '../styles/default-component.styles.js';
+import compStyles from '../styles/default-component.styles.js';
 
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
@@ -16,6 +16,7 @@ import { WordDialog } from './word-dlg.js';
 
 import * as event_types from '../controllers/event_controller.js';
 import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
+import { ExtendWordDialog } from './extend_word_dlg.js';
 
 
 //setBasePath('/assets/icons');
@@ -41,13 +42,13 @@ export class WordTable extends LitElement {
     wordDlg?:WordDialog;
 
     @query("#word-drawer")
-    wordDrawer?:SlDrawer;
+    wordDrawer!:SlDrawer;
     
     @query('#delete-dialog')
     deleteDialog?:SlDialog;
 
     static styles = [
-        resetStyles,
+        compStyles,
         css`
         /* :host {
             height: 100%;
@@ -62,14 +63,16 @@ export class WordTable extends LitElement {
         }
         #word-table {
             width: 100%;
-            height: 100%;
-            /* height:100%; */
-            /* table-layout: fixed; */
-            /* display: block; */
+            max-height: 100%; 
             border-collapse: separate;
-           //border-collapse: separate;
             border-spacing: 0;
             overflow-y: scroll;
+        }
+        .drawer-big {
+            --size: 70%;
+        }
+        .drawer-normal {
+            --size: 50%;
         }
         thead {
             position: sticky;
@@ -79,17 +82,14 @@ export class WordTable extends LitElement {
             border: 1px solid white;
         }
         th {
-            /* position: sticky;
-            top: 0;
-            background-color: var(--sl-color-sky-600);
-            color: white;
-            border: 1px solid white; */
+            
             border-right: 1px solid white;
             /* border-bottom: 1px solid white; */
             padding: 0.25rem;
             text-align: left;
             
         }
+
         td {
             border-left: 1px solid var(--sl-color-orange-400);
             border-bottom: 1px solid var(--sl-color-orange-400);
@@ -104,16 +104,21 @@ export class WordTable extends LitElement {
         tbody tr:nth-child(odd) {
             background: #eee;
         }
-        tbody {
-            /* position: relative; */
-            /* top: 1em;
-            overflow: auto; */
-            z-index: -1;
+        /* :where(th, td):not(.max) {
+            width: 0;
+            white-space: nowrap;
+        } */
+        .min-column {
+            width: 0;
+            white-space: nowrap;
         }
         .action-column {
             display: flex;
             gap: var(--main-padding);
             align-items: center;
+        }
+        .word_td {
+            cursor: pointer;
         }
         `
     ];
@@ -146,12 +151,6 @@ export class WordTable extends LitElement {
     confirmDeleteWord(_word: Word) {
         this.deleteWord = _word;
         this.deleteDialog!.show();
-
-    }
-    updateWord(_word:Word) {
-        this.wordDlg!.word = _word;
-        this.wordDrawer?.show();
-
 
     }
     cancelDelete() {
@@ -189,18 +188,54 @@ export class WordTable extends LitElement {
         this.dispatchEvent(new CustomEvent(event_types.DELETE_WORD, options));
     }
 
-    onDrawerClose(ev:Event) {
+    async onDrawerClose(ev:Event) {
         
+        console.log("onDrawerClose");
         const dialog:DrawerItem = (ev.currentTarget as SlDrawer).firstElementChild! as DrawerItem;
-        dialog.closeAction();
-    
-      }
+        await dialog.closeAction();
+        this.wordDrawer.removeChild(dialog);
 
+
+    
+    }
+    updateWord(_word:Word) {
+        //this.wordDlg!.word = _word;
+
+        let dlg = new WordDialog();
+        dlg.word = _word;
+        dlg.lang_list = this.lang_list;
+        dlg.type_list = this.type_list;
+        dlg.mode = "Update";
+
+        this.wordDrawer.appendChild(dlg);
+        this.wordDrawer.label = "Update word.";
+        this.wordDrawer.placement = "start";
+        this.wordDrawer.style.cssText = "--size: 40%";
+        this.wordDrawer.show();
+    }
+    openDetails(_word:Word) {
+        let dlg = new ExtendWordDialog();
+        dlg.word = _word;
+        // dlg.lang_list = this.lang_list;
+        // dlg.type_list = this.type_list;
+        // dlg.mode = "Update";
+
+        this.wordDrawer.appendChild(dlg);
+        this.wordDrawer.label = _word.word;
+        this.wordDrawer.placement = "bottom";
+        this.wordDrawer.style.cssText = "--size: 70%";
+        this.wordDrawer.show();
+    }
+
+    addDefinition(_word:Word) {
+
+    }
+    //class="drawer-placement-bottom"  placement="start" label="Update word:"
     render() {
         return html`
         
-        <sl-drawer label="Update word:" placement="start" class="drawer-placement-bottom" id="word-drawer" @sl-request-close=${this.onDrawerClose}>
-            <word-dialog id="word-dlg" .lang_list=${this.lang_list} .type_list=${this.type_list} mode="Update"></word-dialog>
+        <sl-drawer id="word-drawer" @sl-request-close=${this.onDrawerClose}>
+            <!-- <word-dialog id="word-dlg" .lang_list=${this.lang_list} .type_list=${this.type_list} mode="Update"></word-dialog> -->
         </sl-drawer>
         <sl-dialog label="Delete ${this.deleteWord?.word}" id="delete-dialog">
             <div class="center-text">Are you sure to delete ${this.deleteWord?.word}</div>
@@ -216,30 +251,33 @@ export class WordTable extends LitElement {
             <table id="word-table">
                 <thead>
                 <tr>
-                    <th>Id</th><th>Word</th><th>Language</th><th>Type</th><th>Actions</th>
+                    <th>Id</th><th>Word</th><th>Language</th><th>Type</th><th class="min-column">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 ${this.words.map((word:Word) => {
                     return html`
-                        <tr>
+                        <tr class="table-row">
                             <td>${word.word_id}</td>
-                            <td>${word.word}</td>
+                            <td class="word_td" @click=${() => this.openDetails(word)}>${word.word}</td>
                             <td>${word.language_title}</td>
                             <td>${word.type}</td>
-                            <td>
+                            <td class="min-column">
                                 <div class="action-column">
-                                    <sl-tooltip content="Delete ${word.word}">
-                                        <sl-icon-button name="trash" label="Delete ${word.word}" @click=${ () => this.confirmDeleteWord(word)}></sl-icon-button>
-                                    </sl-tooltip>
                                     <sl-tooltip content="Update ${word.word}">
                                         <sl-icon-button name="vector-pen" label="Update ${word.word}" @click=${ () => this.updateWord(word)}></sl-icon-button>
                                     </sl-tooltip>
+                                    <sl-tooltip content="Add translation">
+                                        <sl-icon-button name="menu-app" label="Add translation" @click=${ () => this.openDetails(word)}></sl-icon-button>
+                                    </sl-tooltip>
+                                    <sl-tooltip content="Add definition">
+                                        <sl-icon-button name="list-stars" label="Add definition" @click=${ () => this.addDefinition(word)}></sl-icon-button>
+                                    </sl-tooltip>
+                                    <sl-tooltip content="Delete ${word.word}">
+                                        <sl-icon-button name="trash" label="Delete ${word.word}" @click=${ () => this.confirmDeleteWord(word)}></sl-icon-button>
+                                    </sl-tooltip>
                                 </div>
                             </td>
-                                
-                                
-                            
                         </tr>
                     `
                 })}

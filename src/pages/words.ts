@@ -3,7 +3,7 @@ import {customElement, property} from 'lit/decorators.js';
 
 import { Language, Word, Type} from './../app-types.js';
 
-import resetStyles from '../styles/default-component.styles.js';
+import compStyles from '../styles/default-component.styles.js';
 
 import '../components/word-table.js';
 import '../components/word-dlg.js';
@@ -13,7 +13,7 @@ export class WordEdit extends LitElement {
 
   static styles = [
   
-    resetStyles,
+    compStyles,
     css`
 
     :host {

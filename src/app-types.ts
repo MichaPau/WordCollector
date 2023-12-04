@@ -11,16 +11,12 @@ export interface Language {
     token: string,
     title: string,
     title_native?:string,
-
 }
-
 export interface Type {
   type_id?:number,
   title:string,
   token:string,
   last_used?: Date
-
-
 }
 export interface Word {
     word_id?:number,
@@ -30,9 +26,23 @@ export interface Word {
     type: string,
     created_at?: Date,
     last_used?: Date,
+    translations?: Array<Translation>,
+    definitions?: Array<Definition>
 
 }
-
+export interface Definition {
+  definition_id?: number,
+  for_word_id: number,
+  definition: string,
+  created_at?: Date,
+  language: number,
+}
+export interface Translation {
+  translation_id?: number,
+  for_word_id: number,
+  to_word_id: number,
+  created_at?: Date,
+}
 export interface DBEventOptionsItem  {
   detail: {
     "resolve": (value: any | PromiseLike<any>) => void,
@@ -44,7 +54,7 @@ export interface DBEventOptionsItem  {
 }
 
 export interface DrawerItem extends Element{
-  closeAction():void;
+  closeAction():Promise<void>;
 }
 export const deferred = <T>() => {
     let resolve!: (value: T | PromiseLike<T>) => void;

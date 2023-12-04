@@ -5,7 +5,7 @@ import { DBEventOptionsItem, DrawerItem, Language, deferred } from '../app-types
 import * as event_types from '../controllers/event_controller.js';
 import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
 
-import resetStyles from '../styles/default-component.styles.js';
+import compStyles from '../styles/default-component.styles.js';
 
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
 import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.component.js';
@@ -39,7 +39,7 @@ export class LanguageDialog extends LitElement implements DrawerItem{
 
     static styles = [
     
-    resetStyles,
+    compStyles,
     css`
 
     #lang-form {
@@ -65,13 +65,20 @@ export class LanguageDialog extends LitElement implements DrawerItem{
 
     .token-container {
         display: flex;
+        height: 2.5em;
+        /* width: 5em; */
         align-items: center;
         gap: 0.25em;
         padding: 0.25em;
+
+        &:hover {
+            box-shadow: 0px 0px 2px 2px #b5abab;
+        }
     }
     .token-style {
         width: 2em;
         text-align: center;
+        cursor: default;
     }
     .submit-button {
             margin-top: 1rem;
@@ -83,15 +90,23 @@ export class LanguageDialog extends LitElement implements DrawerItem{
 
     sl-icon-button[part="base"] {
         padding: 0;
+        
     }
+    /* sl-icon-button:hover {
+        font-size: 1.2rem; 
+    } */
     `];
 
-    closeAction() {
+    async closeAction():Promise<void> {
         var form:HTMLFormElement = this.shadowRoot!.querySelector("#lang-form")!;
         form.reset();
 
         var result:HTMLElement = this.shadowRoot!.querySelector("#result-info")!;
         result.innerHTML = "";
+
+        this.mode = "Add";
+        
+        return undefined;
 
     }
     private addLanguage = (ev:Event) => {

@@ -34,8 +34,13 @@ export class DBSQLiteController implements ReactiveController{
         this.db = await Database.load("sqlite:C:\\Data\\projects\\web\\Tauri\\WordCollector\\src-tauri\\data\\words.db");
     }
 
-    async selectAll<T>(table:string): Promise<Array<T>> {
-        const q = "SELECT * FROM " + table;
+    async selectAll<T>(table:string, column?:string, value?:string): Promise<Array<T>> {
+        let q = "SELECT * FROM " + table;
+
+        if(column && value) {
+            q += ` WHERE ${column} = ${value}`;
+        }
+        console.log(q);
         let result = await this.db.select<Array<T>>(q);
         return result;
     }
