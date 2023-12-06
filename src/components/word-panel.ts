@@ -7,8 +7,8 @@ import * as event_types from '../controllers/event_controller.js';
 import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
 import compStyles from '../styles/default-component.styles.js';
 
-@customElement('word-dialog')
-export class WordDialog extends LitElement implements DrawerItem {
+@customElement('word-panel')
+export class WordPanel extends LitElement implements DrawerItem {
 
     @property({type: Array})
     lang_list: Array<Language> = [];

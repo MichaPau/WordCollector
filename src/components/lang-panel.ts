@@ -10,8 +10,8 @@ import compStyles from '../styles/default-component.styles.js';
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
 import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.component.js';
 
-@customElement('lang-dialog')
-export class LanguageDialog extends LitElement implements DrawerItem{
+@customElement('lang-panel')
+export class LanguagePanel extends LitElement implements DrawerItem{
 
     @property({type: Array})
     lang_list: Array<Language> = [];
