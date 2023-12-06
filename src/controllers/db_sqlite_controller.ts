@@ -40,7 +40,7 @@ export class DBSQLiteController implements ReactiveController{
         if(column && value) {
             q += ` WHERE ${column} = ${value}`;
         }
-        console.log(q);
+        // console.log(q);
         let result = await this.db.select<Array<T>>(q);
         return result;
     }

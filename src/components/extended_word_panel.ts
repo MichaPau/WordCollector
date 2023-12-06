@@ -1,5 +1,5 @@
-import { LitElement, html, css, PropertyValueMap } from 'lit';
-import { customElement, property, state, query } from 'lit/decorators.js';
+import { LitElement, html, css } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import '@shoelace-style/shoelace/dist/components/details/details.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
@@ -11,6 +11,8 @@ import compStyles from '../styles/default-component.styles.js';
 import * as event_types from '../controllers/event_controller.js';
 import { Definition, DrawerItem, Language, Translation, Word, deferred } from '../app-types.js';
 // import  *  as appTypes from '../app-types.js';
+
+import './def-panel.js';
 
 @customElement('extend-word-panel')
 export class ExtendWordPanel extends LitElement implements DrawerItem {
@@ -33,8 +35,8 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         }
 
         sl-tab-panel {
-            padding: var(--main-padding);
-            padding: 2em;
+            padding-left: var(--main-padding);
+            padding-right: var(--main-padding);
         }
       `
     ];
@@ -56,8 +58,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
     @state()
     definitions:Array<Definition> = [];
 
-    @query("#definitions-form")
-    definitionsForm!:HTMLFormElement;
+    
 
     connectedCallback(): void {
         super.connectedCallback();
@@ -66,9 +67,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
        this.getTables("definition");
     }
 
-    protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-        this.definitionsForm.addEventListener("submit", this.addDefinition);
-    }
+    
     getTables(table:string) {
         const {promise, resolve, reject} = deferred<Array<unknown>>();
         var options = {
@@ -96,12 +95,9 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         this.dispatchEvent(new CustomEvent(event_types.SELECT_ALL, options));
     }
 
-    addDefinition(ev:Event) {
-        ev.preventDefault();
-        console.log("add definition");
-    }
-    cancelAddDefinition() {
-        this.definitionsForm.reset();
+    reloadData(ev:CustomEvent, table:string) {
+        console.log("reloading data for: ", table);
+        console.log(ev.detail);
     }
     async closeAction():Promise<void> {
         return undefined;
@@ -136,22 +132,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                         <p>Add a translation</p>
                     </sl-tab-panel>
                     <sl-tab-panel name="add_definition">
-                        <h3>Add a definition</h3>
-                        <form id="definitions-form">
-                            
-                                <!-- <sl-input label="Definition:" required></sl-input> -->
-                                <sl-textarea rows="3" resize="none"></sl-textarea>
-                                <sl-select name="definition-lang" label="Language" required>
-                                    ${this.lang_list.map((lang) => html`
-                                        <sl-option value="${lang.lang_id!}">${lang.title}</sl-option>
-                                    `)}
-                                </sl-select>
-                            
-                            <div class="button-bar">
-                                <sl-button variant="default" @click=${this.cancelAddDefinition}>Cancel</sl-button>
-                                <sl-button type="submit" variant="primary">Save</sl-button>
-                            </div>
-                        </form>
+                        <def-panel title="Add a definition" .lang_list=${this.lang_list} .word=${this.word} @app-request-word-data=${ (ev:CustomEvent) => this.reloadData(ev, 'definition')}></def-panel>
                     </sl-tab-panel>
                 </sl-tab-group>
             </div>

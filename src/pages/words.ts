@@ -6,7 +6,7 @@ import { Language, Word, Type} from './../app-types.js';
 import compStyles from '../styles/default-component.styles.js';
 
 import '../components/word-table.js';
-import '../components/word-dlg.js';
+//import '../components/word-panel.js';
 
 @customElement('word-edit')
 export class WordEdit extends LitElement {

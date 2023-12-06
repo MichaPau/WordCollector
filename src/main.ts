@@ -27,7 +27,7 @@ import SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
 import compStyles from './styles/default-component.styles.js';
 
-import './pages/language-edit.js';
+import './components/lang-panel.js';
 import './pages/words.js';
 
 import './components/action-bar.js';
@@ -201,10 +201,10 @@ export class MainApp extends LitElement {
     
       <div id="app-container">
       <sl-drawer label="Add a new word:" placement="start" class="drawer-placement-bottom" id="word-drawer" @sl-request-close=${this.onDrawerClose}>
-        <word-dialog .lang_list=${this.lang_list} .type_list=${this.type_list} mode="Add"></word-dialog>
+        <word-panel .lang_list=${this.lang_list} .type_list=${this.type_list} mode="Add"></word-panel>
       </sl-drawer>
       <sl-drawer label="Language settings:" placement="start" class="drawer-placement-bottom" id="lang-drawer" @sl-request-close=${this.onDrawerClose}>
-        <lang-dialog .lang_list=${this.lang_list}></lang-dialog>
+        <lang-panel .lang_list=${this.lang_list}></lang-panel>
       </sl-drawer>
         <sl-split-panel id="split-panel" position="20">
           <div id="left-pane" slot="start">${this.testState}</div>

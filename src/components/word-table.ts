@@ -12,11 +12,11 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 import { getBasePath, setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { SlDialog, SlDrawer } from '@shoelace-style/shoelace';
-import { WordDialog } from './word-dlg.js';
+import { WordPanel } from './word-panel.js';
 
 import * as event_types from '../controllers/event_controller.js';
 import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
-import { ExtendWordDialog } from './extend_word_dlg.js';
+import { ExtendWordPanel } from './extended_word_panel.js';
 
 
 //setBasePath('/assets/icons');
@@ -39,7 +39,7 @@ export class WordTable extends LitElement {
     type_list:Array<Type> = [];
 
     @query("#word-dlg")
-    wordDlg?:WordDialog;
+    wordDlg?:WordPanel;
 
     @query("#word-drawer")
     wordDrawer!:SlDrawer;
@@ -135,7 +135,8 @@ export class WordTable extends LitElement {
             this.wordDrawer?.hide();
         });
         this.addEventListener(event_types.CLOSE_WORD_DIALOG, () => {
-            this.wordDrawer?.hide();
+            this.wordDrawer.replaceChildren();
+            this.wordDrawer.hide();
         });
         this.deleteDialog!.addEventListener('sl-request-close', event => {
             if (event.detail.source === 'overlay') {
@@ -201,7 +202,7 @@ export class WordTable extends LitElement {
     updateWord(_word:Word) {
         //this.wordDlg!.word = _word;
 
-        let dlg = new WordDialog();
+        let dlg = new WordPanel();
         dlg.word = _word;
         dlg.lang_list = this.lang_list;
         dlg.type_list = this.type_list;
@@ -214,8 +215,9 @@ export class WordTable extends LitElement {
         this.wordDrawer.show();
     }
     openDetails(_word:Word) {
-        let dlg = new ExtendWordDialog();
+        let dlg = new ExtendWordPanel();
         dlg.word = _word;
+        dlg.lang_list = this.lang_list;
         // dlg.lang_list = this.lang_list;
         // dlg.type_list = this.type_list;
         // dlg.mode = "Update";
