@@ -25,6 +25,9 @@ export const CLOSE_WORD_DIALOG = "CLOSE_WORD_DIALOG";
 export const SEARCH_WORDS = "SEARCH_WORDS";
 export const RESET_SEARCH_WORDS = "RESET_SEARCH_WORDS";
 
+export const SORT_TABLE= "SORT_TABLE";
+export const SORT_ICON_ACTIVE = "SORT_ICON_ACTIVE";
+
 export class AppEventController implements ReactiveController {
     private host: MainApp;
    
@@ -38,6 +41,8 @@ export class AppEventController implements ReactiveController {
   
     hostConnected(): void {
         this.host.addEventListener(testEvent, this.onTestEvent);
+
+        this.host.addEventListener(SORT_TABLE, this.onSortTable);
         
         this.host.addEventListener(SELECT_ALL, this.onSelectAll);
 
@@ -58,6 +63,8 @@ export class AppEventController implements ReactiveController {
     hostDisconnected(): void {
         this.host.removeEventListener(testEvent, this.onTestEvent);
         
+        this.host.removeEventListener(SORT_TABLE, this.onSortTable);
+
         this.host.removeEventListener(SELECT_ALL, this.onSelectAll);
 
         this.host.removeEventListener(SEARCH_WORDS, this.onSearchWords);
@@ -85,6 +92,9 @@ export class AppEventController implements ReactiveController {
             ev.reject("no");
     }
 
+    onSortTable = (ev:Event) => {
+       this.host.settingsCtr.updateSort((ev as CustomEvent).detail); 
+    }
     onSearchWords = async (ev:Event) => {
         let value = (ev as CustomEvent).detail;
         var list = await this.host.dbCtr.searchForWords(value);
@@ -96,8 +106,9 @@ export class AppEventController implements ReactiveController {
 
     onSelectAll = async (ev:Event) => {
         let table = (ev as CustomEvent).detail.table;
+        let column = (ev as CustomEvent).detail.column;
         let value = (ev as CustomEvent).detail.value;
-        await this.host.dbCtr.selectAll(table, "for_word_id", value)
+        await this.host.dbCtr.selectAll(table, column, value)
         .then((result) => {
             let resolve =  (ev as CustomEvent).detail.resolve;
             resolve(result);
@@ -124,11 +135,23 @@ export class AppEventController implements ReactiveController {
     };
 
     onAddDefinition = async (ev:Event) => {
-
+        console.log("onAddDefinition");
+        console.log("onAddDefinitions");
+        
+        const e:DeferredEvent<string> = ev as DeferredEvent<string>;
+        await this.host.dbCtr.addDefinition(e.detail).then(() => {
+            e.resolve("definition added");
+        })
+        .catch((e) => e.reject(e));
     }
 
     onDeleteDefinition = async (ev:Event) => {
-        
+        console.log("onDeleteDefinition");
+        const e:DeferredEvent<string> = ev as DeferredEvent<string>;
+        await this.host.dbCtr.deleteDefinition(e.detail).then(() => {
+            e.resolve("definition removed");
+        })
+        .catch((e) => e.reject(e));
     }
     onAddLanguage = async(ev:Event) => {
         await this.languageActionWithPromise(this.host.dbCtr.addLanguage, ev)

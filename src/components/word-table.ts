@@ -1,5 +1,5 @@
 import { LitElement, html, css, PropertyValueMap } from 'lit';
-import { customElement, property, state, query} from 'lit/decorators.js';
+import { customElement, property, state, query, queryAll} from 'lit/decorators.js';
 
 import { DBEventOptionsItem, DrawerItem, Language, Type, Word, deferred } from '../app-types';
 
@@ -12,11 +12,14 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 import { getBasePath, setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { SlDialog, SlDrawer } from '@shoelace-style/shoelace';
+
 import { WordPanel } from './word-panel.js';
+import './table-sort-icon.js';
 
 import * as event_types from '../controllers/event_controller.js';
 import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
 import { ExtendWordPanel } from './extended_word_panel.js';
+import { TableSortIcon } from './table-sort-icon.js';
 
 
 //setBasePath('/assets/icons');
@@ -46,6 +49,9 @@ export class WordTable extends LitElement {
     
     @query('#delete-dialog')
     deleteDialog?:SlDialog;
+
+    @queryAll("table-sort-icon")
+    sortButtons!: Array<TableSortIcon>;
 
     static styles = [
         compStyles,
@@ -87,9 +93,16 @@ export class WordTable extends LitElement {
             /* border-bottom: 1px solid white; */
             padding: 0.25rem;
             text-align: left;
+           
             
         }
+        
 
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         td {
             border-left: 1px solid var(--sl-color-orange-400);
             border-bottom: 1px solid var(--sl-color-orange-400);
@@ -143,6 +156,22 @@ export class WordTable extends LitElement {
               event.preventDefault();
             }
         });
+        this.addEventListener(event_types.SORT_ICON_ACTIVE, (ev:Event) => {
+            const emit_item = (ev as CustomEvent).detail;
+            
+            for(const sortButton of this.sortButtons) {
+                if(sortButton !== emit_item) {
+                    (sortButton as TableSortIcon).sort_state = "neutral";
+                }
+            }
+            // this.sortButtons.map((item:TableSortIcon) => {
+            //     if(item !== emit_item) {
+            //         item.sort_state = "neutral";
+            //     }
+            // });
+        });
+
+        console.log(this.sortButtons);
     }
     connectedCallback(): void {
         super.connectedCallback();
@@ -253,7 +282,17 @@ export class WordTable extends LitElement {
             <table id="word-table">
                 <thead>
                 <tr>
-                    <th>Id</th><th>Word</th><th>Language</th><th>Type</th><th class="min-column">Actions</th>
+                    <th>Id</th>
+                    <th>
+                        <div class="header-row">Word<table-sort-icon column_name="word" column_type="string"></table-sort-icon></div> 
+                    </th>
+                    <th>
+                        <div class="header-row">Language<table-sort-icon column_name="language_title" column_type="string"></table-sort-icon></div>
+                    </th>
+                    <th>
+                        <div class="header-row">Type<table-sort-icon column_name="type" column_type="string"></table-sort-icon></div>
+                    </th>
+                    <th class="min-column">Actions</th>
                 </tr>
                 </thead>
                 <tbody>

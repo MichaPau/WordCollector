@@ -18,7 +18,7 @@ export interface Type {
   token:string,
   last_used?: Date
 }
-export interface Word {
+export interface Word extends IIndexable{
     word_id?:number,
     word:string,
     language: number,
@@ -42,6 +42,16 @@ export interface Translation {
   for_word_id: number,
   to_word_id: number,
   created_at?: Date,
+}
+
+export interface IIndexable<T = any> {
+  [key: string]: T;
+}
+
+export interface SorterItem {
+  column: string,
+  reversed: boolean,
+  type: "number" | "string" | "date"
 }
 export interface DBEventOptionsItem  {
   detail: {

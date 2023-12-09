@@ -7,12 +7,16 @@ import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 
+import { SlTabGroup } from '@shoelace-style/shoelace';
+
 import compStyles from '../styles/default-component.styles.js';
 import * as event_types from '../controllers/event_controller.js';
 import { Definition, DrawerItem, Language, Translation, Word, deferred } from '../app-types.js';
 // import  *  as appTypes from '../app-types.js';
 
 import './def-panel.js';
+//import { AppRequestWordDataEvent } from '../events/app-request-word-data.js';
+import { DeferredEvent } from '../events/app-events.js';
 
 @customElement('extend-word-panel')
 export class ExtendWordPanel extends LitElement implements DrawerItem {
@@ -33,7 +37,16 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         .horizontal > * {
             flex: 1 1 50%;
         }
+        .definition-item {
+            display:flex;
+            align-items: center;
+            justify-content: space-between;
+            /* border: 1px solid black;
+        } */
 
+        .def-text {
+            flex: 1 1 80%;
+        }
         sl-tab-panel {
             padding-left: var(--main-padding);
             padding-right: var(--main-padding);
@@ -71,7 +84,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
     getTables(table:string) {
         const {promise, resolve, reject} = deferred<Array<unknown>>();
         var options = {
-            detail: { "resolve": resolve, "reject": reject, "table": table, "value":this.word.word_id!.toString()},
+            detail: { "resolve": resolve, "reject": reject, "table": table, "column": "for_word_id", "value":this.word.word_id!.toString()},
             composed: true,
             bubbles: true
         }
@@ -95,9 +108,24 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         this.dispatchEvent(new CustomEvent(event_types.SELECT_ALL, options));
     }
 
-    reloadData(ev:CustomEvent, table:string) {
+    reloadData(table:string) {
         console.log("reloading data for: ", table);
-        console.log(ev.detail);
+        this.getTables(table);
+        const panelGroup:SlTabGroup =  this.shadowRoot!.querySelector("#panel-group") as SlTabGroup;
+        panelGroup.show("show_details");
+    }
+
+    deleteDefinition(item:Definition) {
+        var deleteDefEvent = new DeferredEvent<string>(event_types.DELETE_DEFINITION, item);
+        const p:Promise<string> = deleteDefEvent.promise;
+        p.then(() => {
+            this.getTables('definition');
+        }).catch((e) => {
+            console.log(e);
+            
+        });
+
+        this.dispatchEvent(deleteDefEvent);
     }
     async closeAction():Promise<void> {
         return undefined;
@@ -106,8 +134,8 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         return html`
             <div id="container">
                 
-                <sl-tab-group>
-                    <sl-tab slot="nav" panel="show_details">Details</sl-tab>
+                <sl-tab-group id="panel-group">
+                    <sl-tab id="detail-tab" slot="nav" panel="show_details">Details</sl-tab>
                     <sl-tab slot="nav" panel="add_translation">Add Translation</sl-tab>
                     <sl-tab slot="nav" panel="add_definition">Add Definition</sl-tab>
                     <sl-tab-panel name="show_details">
@@ -122,7 +150,12 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                             <sl-details summary="Definitions">
                                 <ul>
                                 ${this.definitions.map((item:Definition) => html`
-                                    <li> ${item.definition}</li>
+                                    <li class="definition-item">
+                                        <sl-textarea class="def-text" rows="3" resize="none" readonly value=${item.definition}></sl-textarea>
+                                        <sl-tooltip content="Delete">
+                                            <sl-icon-button name="trash" label="Delete" @click=${ () => this.deleteDefinition(item)}></sl-icon-button>
+                                        </sl-tooltip>
+                                    </li>
                                 `)}
                                 </ul>
                             </sl-details>
@@ -132,7 +165,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                         <p>Add a translation</p>
                     </sl-tab-panel>
                     <sl-tab-panel name="add_definition">
-                        <def-panel title="Add a definition" .lang_list=${this.lang_list} .word=${this.word} @app-request-word-data=${ (ev:CustomEvent) => this.reloadData(ev, 'definition')}></def-panel>
+                        <def-panel title="Add a definition" .lang_list=${this.lang_list} .word=${this.word} @app-request-word-data=${ () => this.reloadData('definition')}></def-panel>
                     </sl-tab-panel>
                 </sl-tab-group>
             </div>

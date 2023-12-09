@@ -3,7 +3,7 @@ import { LitElement, ReactiveController, ReactiveControllerHost } from "lit";
 import Database from "tauri-plugin-sql-api";
 
 
-import { Word, Language } from "../app-types";
+import { Word, Language, Definition } from "../app-types";
 
 
 
@@ -84,6 +84,25 @@ export class DBSQLiteController implements ReactiveController{
         }
     }
     
+    async addDefinition(definition:Definition) {
+        const q = "INSERT INTO definition (for_word_id, definition, language) VALUES ($1, $2, $3)";
+        try {
+            let result = await this.db.execute(q, [definition.for_word_id, definition.definition, definition.language]);
+            return result;
+        } catch(e) {
+            throw(e);
+        }
+    }
+
+    async deleteDefinition(definition: Definition) {
+        const q = "DELETE FROM definition WHERE definition_id = $1";
+        try {
+            let result = await this.db.execute(q, [definition.definition_id]);
+            return result;
+        } catch(e) {
+            throw(e);
+        }
+    }
     async updateWord(item:Word) {
         const q = "UPDATE word SET word = $1, language = $2, type = $3 WHERE word_id = $4";
 

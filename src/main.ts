@@ -31,6 +31,7 @@ import './components/lang-panel.js';
 import './pages/words.js';
 
 import './components/action-bar.js';
+import { AppSettingsController } from './controllers/app_settings_controller.js';
 //import { QueryResult } from 'tauri-plugin-sql-api';
 
 @customElement('main-app')
@@ -134,6 +135,7 @@ export class MainApp extends LitElement {
 
   public dbCtr = new DBSQLiteController(this);
   private eventCtr = new AppEventController(this);
+  public settingsCtr = new AppSettingsController(this);
 
   @property()
   info = 'nothing here';
