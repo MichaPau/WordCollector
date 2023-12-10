@@ -1,10 +1,17 @@
 import { css } from 'lit';
 
 export default css`
+  :root {
+    --sl-focus-ring-width: 1px;
+    --sl-focus-ring: 0 0 0 var(--sl-focus-ring-width) #1d69b9;
+    
+  }
   :host {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    --sl-focus-ring-width: 1px;
+    --sl-focus-ring: 0 0 0 var(--sl-focus-ring-width) #1d69b9;
   }
 
   :host *,
