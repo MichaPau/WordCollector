@@ -1,6 +1,6 @@
-import { LitElement, ReactiveController, ReactiveControllerHost } from "lit";
+import { ReactiveController, ReactiveControllerHost } from "lit";
 import { setDefaultAnimation } from "@shoelace-style/shoelace/dist/utilities/animation-registry.js";
-import { SorterItem, Word } from "../app-types";
+import { SorterItem, WordIndexable } from "../app-types";
 import { MainApp } from "../main";
 
 
@@ -8,7 +8,8 @@ export class AppSettingsController implements ReactiveController{
     
     private host: MainApp;
 
-    private sort_tables:Array<string> = ["word_id", "word", "language", "type", "created_at"];
+    //private sort_tables:Array<string> = ["word_id", "word", "language", "type", "created_at"];
+
     private sorters:Array<SorterItem> = [{column: "word_id", reversed: false , type: "number"}];
 
     constructor(host: ReactiveControllerHost & MainApp) {
@@ -17,6 +18,7 @@ export class AppSettingsController implements ReactiveController{
     }
 
     updateSort(sortItem: SorterItem) {
+        
         const i = this.sorters.findIndex(item => item.column === sortItem.column);
         if(i > -1) {
             this.sorters.splice(i, 1);
@@ -31,7 +33,7 @@ export class AppSettingsController implements ReactiveController{
     sortWords() {
         this.host.word_list = [...this.host.word_list.sort(this.wordTableCompareFn)];
     }
-    wordTableCompareFn = (a:Word, b: Word) => {
+    wordTableCompareFn = (a:WordIndexable, b: WordIndexable) => {
         let result = 0;
         this.sorters.map((item) => {
             switch (item.type) {
@@ -44,8 +46,9 @@ export class AppSettingsController implements ReactiveController{
                     result = result || exp;
                     break;
                 case "date":
-                    var exp:number = item.reversed ? b[item.column].getTime() - a[item.column].getTime() : a[item.column].getTime() - b[item.column].getTime();
-                    result = result || exp;
+                    console.log(typeof a[item.column]);
+                    //var exp:number = item.reversed ? (b[item.column] as Date).getTime() - (a[item.column] as Date).getTime() : (a[item.column] as Date).getTime() - (b[item.column] as Date).getTime();
+                    //result = result || exp;
                     break;
             }
             
