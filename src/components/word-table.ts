@@ -1,7 +1,7 @@
 import { LitElement, html, css, PropertyValueMap } from 'lit';
 import { customElement, property, state, query, queryAll} from 'lit/decorators.js';
 
-import { DBEventOptionsItem, DrawerItem, Language, Type, Word, deferred } from '../app-types';
+import { DBEventOptionsItem, DrawerItem, Language, SortableColumn, Type, Word, deferred } from '../app-types';
 
 import compStyles from '../styles/default-component.styles.js';
 
@@ -52,6 +52,8 @@ export class WordTable extends LitElement {
 
     @queryAll("table-sort-icon")
     sortButtons!: Array<TableSortIcon>;
+
+    sortableColumn:SortableColumn = "word";
 
     static styles = [
         compStyles,
@@ -171,7 +173,6 @@ export class WordTable extends LitElement {
             // });
         });
 
-        console.log(this.sortButtons);
     }
     connectedCallback(): void {
         super.connectedCallback();
@@ -254,7 +255,7 @@ export class WordTable extends LitElement {
         this.wordDrawer.appendChild(dlg);
         this.wordDrawer.label = _word.word;
         this.wordDrawer.placement = "bottom";
-        this.wordDrawer.style.cssText = "--size: 70%";
+        this.wordDrawer.style.cssText = "--size: 90%";
         this.wordDrawer.show();
     }
 
@@ -292,6 +293,9 @@ export class WordTable extends LitElement {
                     <th>
                         <div class="header-row">Type<table-sort-icon column_name="type" column_type="string"></table-sort-icon></div>
                     </th>
+                    <th>
+                        <div class="header-row">Date<table-sort-icon column_name="created_timestamp" column_type="number"></table-sort-icon></div>
+                    </th>
                     <th class="min-column">Actions</th>
                 </tr>
                 </thead>
@@ -303,17 +307,18 @@ export class WordTable extends LitElement {
                             <td class="word_td" @click=${() => this.openDetails(word)}>${word.word}</td>
                             <td>${word.language_title}</td>
                             <td>${word.type}</td>
+                            <td>${word.created_at}</td>
                             <td class="min-column">
                                 <div class="action-column">
                                     <sl-tooltip content="Update ${word.word}">
                                         <sl-icon-button name="vector-pen" label="Update ${word.word}" @click=${ () => this.updateWord(word)}></sl-icon-button>
+                                    </sl-tooltip> 
+                                    <sl-tooltip content="Open word details">
+                                        <sl-icon-button name="menu-app" label="Open details" @click=${ () => this.openDetails(word)}></sl-icon-button>
                                     </sl-tooltip>
-                                    <sl-tooltip content="Add translation">
-                                        <sl-icon-button name="menu-app" label="Add translation" @click=${ () => this.openDetails(word)}></sl-icon-button>
-                                    </sl-tooltip>
-                                    <sl-tooltip content="Add definition">
+                                    <!-- <sl-tooltip content="Add definition">
                                         <sl-icon-button name="list-stars" label="Add definition" @click=${ () => this.addDefinition(word)}></sl-icon-button>
-                                    </sl-tooltip>
+                                    </sl-tooltip> -->
                                     <sl-tooltip content="Delete ${word.word}">
                                         <sl-icon-button name="trash" label="Delete ${word.word}" @click=${ () => this.confirmDeleteWord(word)}></sl-icon-button>
                                     </sl-tooltip>

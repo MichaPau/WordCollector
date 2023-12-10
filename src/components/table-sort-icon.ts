@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import compStyles from '../styles/default-component.styles.js';
 import {SORT_TABLE, SORT_ICON_ACTIVE} from '../controllers/event_controller.js';
-import { SorterItem } from '../app-types.js';
+import { SorterItem, SortableColumn } from '../app-types.js';
 
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
@@ -16,7 +16,9 @@ export class TableSortIcon extends LitElement {
     sort_state:"neutral" | "sorted"| "reversed" = "neutral";
 
     @property()
-    column_name: string | undefined = undefined;
+    column_name?: SortableColumn;
+
+    //column_name: string | undefined = undefined;
 
     @property()
     column_type: "string" | "number" | "date" = "string";
@@ -38,17 +40,24 @@ export class TableSortIcon extends LitElement {
     ];
     
     toggleSortState() {
-        if(this.sort_state === "neutral")
+        // if(this.sort_state === "neutral")
+        //     this.sort_state = "sorted";
+        // else if (this.sort_state === "sorted")
+        //     this.sort_state = "reversed";
+        // else
+        //     this.sort_state = "neutral";
+
+        if(this.sort_state === "neutral" || this.sort_state === "reversed")
             this.sort_state = "sorted";
-        else if (this.sort_state === "sorted")
+        else 
             this.sort_state = "reversed";
-        else
-            this.sort_state = "neutral";
         
-        const sortDetail:SorterItem = {column: this.column_name!, reversed: this.sort_state === "reversed" ? true : false, type: this.column_type };
+        
+        const sortDetail:SorterItem = {column: this.column_name as string, reversed: this.sort_state === "reversed" ? true : false, type: this.column_type };
         const sortEv = new CustomEvent(SORT_TABLE, {bubbles: true, composed: true, detail: sortDetail});
 
         this.dispatchEvent(new CustomEvent(SORT_ICON_ACTIVE, {bubbles: true, composed: true, detail: this}));
+
         this.dispatchEvent(sortEv);
     }
     render() {
