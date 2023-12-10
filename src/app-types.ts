@@ -18,18 +18,26 @@ export interface Type {
   token:string,
   last_used?: Date
 }
-export interface Word extends IIndexable{
+export interface WordIndexable extends Word, IIndexable {}
+
+export interface Word {
     word_id?:number,
+    
     word:string,
     language: number,
-    language_title?: string,
     type: string,
+    
+    language_title?: string,
     created_at?: Date,
     last_used?: Date,
+    created_timestamp?: number,
     translations?: Array<Translation>,
     definitions?: Array<Definition>
 
 }
+
+export type SortableColumn = keyof Word;
+
 export interface Definition {
   definition_id?: number,
   for_word_id: number,
