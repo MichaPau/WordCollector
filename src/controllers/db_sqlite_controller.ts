@@ -3,7 +3,7 @@ import { LitElement, ReactiveController, ReactiveControllerHost } from "lit";
 import Database from "tauri-plugin-sql-api";
 
 
-import { Word, Language, Definition } from "../app-types";
+import { Word, Language, Definition, Translation } from "../app-types";
 
 
 
@@ -46,7 +46,7 @@ export class DBSQLiteController implements ReactiveController{
     }
     
     async selectAllWords<T>(): Promise<Array<T>> {
-        const q = "SELECT w.*, l.title as language_title FROM word w INNER JOIN language l ON l.lang_id = w.language";
+        const q = "SELECT w.*, l.title as language_title, unixepoch(w.created_at) as created_timestamp FROM word w INNER JOIN language l ON l.lang_id = w.language";
         let result = await this.db.select<Array<T>>(q);
         return result;
     }
@@ -58,6 +58,31 @@ export class DBSQLiteController implements ReactiveController{
         let result = await this.db.select(q, [value]);
         
         return result as Array<Word>;
+    }
+
+    async getWordDetails(word_id:number): Promise<Word> {
+        
+        console.log("getWordDetails");
+
+        const q = "SELECT w.*, l.title as language_title, unixepoch(w.created_at) as created_timestamp \
+        FROM word w INNER JOIN language l ON l.lang_id = w.language WHERE w.word_id = $1 LIMIT 1";
+
+        const q_def  = "SELECT * from definition WHERE for_word_id = $1";
+        const q_trans = "SELECT * from translation WHERE for_word_id = $1";
+
+
+        let [wordResult, defResult, transResult] = await Promise.all([
+            this.db.select(q, [word_id]),
+            this.db.select(q_def, [word_id]),
+            this.db.select(q_trans, [word_id]),
+        ])
+
+        let w:Word = (wordResult as Array<Word>)[0];
+        w.definitions = defResult as Array<Definition>;
+        w.translations = transResult as Array<Translation>;
+
+        return w;
+
     }
     async checkQuery<T>(q:string, values:Array<string | number>):Promise<T> {
         let result = await this.db.select(q, values);

@@ -15,6 +15,7 @@ export const DELETE_LANGUAGE = "DELETE_LANGUAGE ";
 export const ADD_WORD = "ADD_WORD";
 export const UPDATE_WORD = "UPDATE_WORD";
 export const DELETE_WORD = "DELETE_WORD";
+export const GET_WORD_DETAILS = "GET_WORD_DETAILS";
 
 export const ADD_DEFINITION = "ADD_DEFINITION";
 export const DELETE_DEFINITION = "DELETE_DEFINITION";
@@ -52,6 +53,7 @@ export class AppEventController implements ReactiveController {
         this.host.addEventListener(ADD_LANGUAGE, this.onAddLanguage);
         this.host.addEventListener(UPDATE_LANGUAGE, this.onUpdateLanguage);
         this.host.addEventListener(DELETE_LANGUAGE, this.onDeleteLanguage);
+        this.host.addEventListener(GET_WORD_DETAILS, this.onGetWordDetails);
 
         this.host.addEventListener(ADD_DEFINITION, this.onAddDefinition);
         this.host.addEventListener(DELETE_DEFINITION, this.onDeleteDefinition);
@@ -73,6 +75,7 @@ export class AppEventController implements ReactiveController {
         this.host.removeEventListener(ADD_WORD, this.onAddWord);
         this.host.removeEventListener(UPDATE_WORD, this.onUpdateWord);
         this.host.removeEventListener(DELETE_WORD, this.onDeleteWord);
+        this.host.removeEventListener(GET_WORD_DETAILS, this.onGetWordDetails);
 
         this.host.removeEventListener(ADD_DEFINITION, this.onAddDefinition);
         this.host.removeEventListener(DELETE_DEFINITION, this.onDeleteDefinition);
@@ -102,6 +105,7 @@ export class AppEventController implements ReactiveController {
     }
     onResetSearchWords = async() => {
         this.host.word_list = await this.host.dbCtr.selectAllWords();
+        this.host.settingsCtr.sortWords();
     }
 
     onSelectAll = async (ev:Event) => {
@@ -117,6 +121,17 @@ export class AppEventController implements ReactiveController {
             let reject =  (ev as CustomEvent).detail.reject;
             reject(e);
         });
+    }
+    onGetWordDetails = async (ev:Event) => {
+        const e:DeferredEvent<Word> = ev as DeferredEvent<Word>;
+
+        const word_id = e.detail as number;
+        await this.host.dbCtr.getWordDetails(word_id).then((result) => {
+            e.resolve(result);
+        }).catch((e) => {
+            e.reject(e);
+        });
+
     }
     onAddWord = async (ev:Event) => {
         await this.wordActionWithPromise(this.host.dbCtr.addWord, ev)
