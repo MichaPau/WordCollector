@@ -36,8 +36,24 @@
 
 html, body {
   height: 100%;
+  /* position: relative; */
 }
 
+.sl-toast-stack {
+  position: absolute;
+  display: flex;
+  gap: var(--main-padding);
+  flex-direction: column-reverse;
+  top: auto;
+  bottom: 1em;
+  right: 1em;
+ 
+}
+.sl-toast-stack > * {
+  height: auto;
+  flex: 1;
+  transition: all 250ms linear
+}
 main-app {
   display: block;
   padding: var(--main-padding);

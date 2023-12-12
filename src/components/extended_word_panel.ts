@@ -11,10 +11,12 @@ import { SlTabGroup, SlTextarea, SlDetails } from '@shoelace-style/shoelace';
 
 import compStyles from '../styles/default-component.styles.js';
 import * as event_types from '../controllers/event_controller.js';
-import { Definition, DrawerItem, Language, Translation, Word, deferred } from '../app-types.js';
+import { Definition, DrawerItem, Language, Translation, Word} from '../app-types.js';
 // import  *  as appTypes from '../app-types.js';
 
+import './trans-panel.js';
 import './def-panel.js';
+import './def-area.js';
 //import { AppRequestWordDataEvent } from '../events/app-request-word-data.js';
 import { DeferredEvent } from '../events/app-events.js';
 
@@ -99,7 +101,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         const p:Promise<Word> = getDataEvent.promise;
 
         p.then((result) => {
-            console.log("Word details result:", result);
+            
             this.definitions = result.definitions!;
             this.translations = result.translations!;
 
@@ -110,32 +112,6 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         this.dispatchEvent(getDataEvent);
 
     }
-    // getTables(table:string) {
-    //     const {promise, resolve, reject} = deferred<Array<unknown>>();
-    //     var options = {
-    //         detail: { "resolve": resolve, "reject": reject, "table": table, "column": "for_word_id", "value":this.word.word_id!.toString()},
-    //         composed: true,
-    //         bubbles: true
-    //     }
-
-    //     promise
-    //     .then((value) => { 
-    //         switch(table) {
-    //             case "translation":
-    //                 this.translations = value as Array<Translation>;
-    //                 break;
-    //             case "definition":
-    //                 this.definitions = value as Array<Definition>;
-    //         }
-    //     })
-    //     .catch((e) => { 
-    //         console.log("Promise rejected:", e);
-           
-    //     });
-        
-
-    //     this.dispatchEvent(new CustomEvent(event_types.SELECT_ALL, options));
-    // }
 
     reloadData(table:string) {
         //console.log("reloading data for: ", table);
@@ -188,13 +164,13 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                             </sl-details>
                             <sl-details id="definition" summary="Definitions (${this.definitions.length})">
                                 <ul class="definition-list">
-                                ${this.definitions.map((item:Definition) => html`
+                                ${this.definitions.map((item:Definition, index:number) => html`
                                     <li class="definition-item">
-                                        <sl-textarea class="def-text" resize="auto" rows="1" readonly value=${item.definition} @click=${this.editDefinition}></sl-textarea>
-                                        <!-- <span class="textarea-span">${item.definition}</span> -->
+                                        <definition-area tabindex=${index} .definition=${item} @app-request-word-data=${ () => this.reloadData('definition')}></definition-area>
+                                        <!-- <sl-textarea class="def-text" resize="auto" rows="1" readonly value=${item.definition} @click=${this.editDefinition}></sl-textarea>
                                         <sl-tooltip content="Delete">
                                             <sl-icon-button name="trash" label="Delete" @click=${ () => this.deleteDefinition(item)}></sl-icon-button>
-                                        </sl-tooltip>
+                                        </sl-tooltip> -->
                                     </li>
                                 `)}
                                 </ul>
@@ -202,10 +178,10 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                         </div>
                     </sl-tab-panel>
                     <sl-tab-panel name="add_translation">
-                        <p>Add a translation</p>
+                        <translation-panel .lang_list=${this.lang_list}></translation-panel>
                     </sl-tab-panel>
                     <sl-tab-panel name="add_definition">
-                        <def-panel title="Add a definition" .lang_list=${this.lang_list} .word=${this.word} @app-request-word-data=${ () => this.reloadData('definition')}></def-panel>
+                        <definition-panel title="Add a definition" .lang_list=${this.lang_list} .word=${this.word} @app-request-word-data=${ () => this.reloadData('definition')}></definition-panel>
                     </sl-tab-panel>
                 </sl-tab-group>
             </div>

@@ -26,7 +26,7 @@ export class ActionBar extends LitElement {
     ];
     
     @query("#search-input")
-    serachInput?: SlInput;
+    searchInput?: SlInput;
 
     @query("#test-button")
     testButton?:SlButton;
@@ -40,7 +40,7 @@ export class ActionBar extends LitElement {
     }
 
     onSearchInput() {
-        let value = this.serachInput?.value;
+        let value = this.searchInput?.value;
         if(value && value.length > 0)
             this.dispatchEvent(new CustomEvent(event_types.SEARCH_WORDS, {bubbles: true, composed: true, detail: value}));
         else

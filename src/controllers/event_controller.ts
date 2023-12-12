@@ -18,12 +18,17 @@ export const DELETE_WORD = "DELETE_WORD";
 export const GET_WORD_DETAILS = "GET_WORD_DETAILS";
 
 export const ADD_DEFINITION = "ADD_DEFINITION";
+export const UPDATE_DEFINITION = "UPDATE_DEFINITION";
 export const DELETE_DEFINITION = "DELETE_DEFINITION";
+
+export const ADD_TRANSLATION = "ADD_TRANSLATION";
+export const DELETE_TRANSLATION = "DELETE_TRANSLATION";
 
 export const CANCEL_UPDATE = "CANCEL_UPDATE";
 export const CLOSE_WORD_DIALOG = "CLOSE_WORD_DIALOG";
 
 export const SEARCH_WORDS = "SEARCH_WORDS";
+export const SEARCH_WORDS_DEFERRED = "SEARCH_WORDS_DEFERRED";
 export const RESET_SEARCH_WORDS = "RESET_SEARCH_WORDS";
 
 export const SORT_TABLE= "SORT_TABLE";
@@ -48,6 +53,7 @@ export class AppEventController implements ReactiveController {
         this.host.addEventListener(SELECT_ALL, this.onSelectAll);
 
         this.host.addEventListener(SEARCH_WORDS, this.onSearchWords);
+        this.host.addEventListener(SEARCH_WORDS_DEFERRED, this.onSearchWordsDeferred);
         this.host.addEventListener(RESET_SEARCH_WORDS, this.onResetSearchWords);
 
         this.host.addEventListener(ADD_LANGUAGE, this.onAddLanguage);
@@ -56,7 +62,11 @@ export class AppEventController implements ReactiveController {
         this.host.addEventListener(GET_WORD_DETAILS, this.onGetWordDetails);
 
         this.host.addEventListener(ADD_DEFINITION, this.onAddDefinition);
+        this.host.addEventListener(UPDATE_DEFINITION, this.onUpdateDefinition);
         this.host.addEventListener(DELETE_DEFINITION, this.onDeleteDefinition);
+
+        this.host.addEventListener(ADD_TRANSLATION, this.onAddTranslation);
+        this.host.addEventListener(DELETE_TRANSLATION, this.onDeleteTranslation);
 
         this.host.addEventListener(ADD_WORD, this.onAddWord);
         this.host.addEventListener(UPDATE_WORD, this.onUpdateWord);
@@ -70,6 +80,7 @@ export class AppEventController implements ReactiveController {
         this.host.removeEventListener(SELECT_ALL, this.onSelectAll);
 
         this.host.removeEventListener(SEARCH_WORDS, this.onSearchWords);
+        this.host.removeEventListener(SEARCH_WORDS_DEFERRED, this.onSearchWordsDeferred);
         this.host.removeEventListener(RESET_SEARCH_WORDS, this.onResetSearchWords);
 
         this.host.removeEventListener(ADD_WORD, this.onAddWord);
@@ -78,7 +89,11 @@ export class AppEventController implements ReactiveController {
         this.host.removeEventListener(GET_WORD_DETAILS, this.onGetWordDetails);
 
         this.host.removeEventListener(ADD_DEFINITION, this.onAddDefinition);
+        this.host.removeEventListener(UPDATE_DEFINITION, this.onUpdateDefinition);
         this.host.removeEventListener(DELETE_DEFINITION, this.onDeleteDefinition);
+
+        this.host.removeEventListener(ADD_TRANSLATION, this.onAddTranslation);
+        this.host.removeEventListener(DELETE_TRANSLATION, this.onDeleteTranslation);
 
         this.host.removeEventListener(ADD_LANGUAGE, this.onAddLanguage);
         this.host.removeEventListener(UPDATE_LANGUAGE, this.onUpdateLanguage);
@@ -86,13 +101,16 @@ export class AppEventController implements ReactiveController {
     }
 
     onTestEvent = (e:Event) => {
-        console.log("from eventController:",this);
+        
         const ev:DeferredEvent<number> = e as DeferredEvent<number>;
         this.host.testState++;
-        if(ev.detail < 0.5)
+        if(ev.detail < 0.5) {
             ev.resolve(this.host.testState);
-        else
+            this.host.notify("The score is " + this.host.testState, "success");
+        } else {
             ev.reject("no");
+            this.host.notify("Luck is a bird..", "warning");
+        }
     }
 
     onSortTable = (ev:Event) => {
@@ -102,6 +120,17 @@ export class AppEventController implements ReactiveController {
         let value = (ev as CustomEvent).detail;
         var list = await this.host.dbCtr.searchForWords(value);
         this.host.word_list = list;
+    }
+    onSearchWordsDeferred = async (ev:Event) => {
+        console.log("search deferred");
+        const _ev:DeferredEvent<Array<Word>> = ev as DeferredEvent<Array<Word>>;
+        await this.host.dbCtr.searchForWords(_ev.detail.input, _ev.detail.lang_id)
+        .then((result) => {
+            _ev.resolve(result);
+        })
+        .catch((e) => {
+            _ev.reject(e);
+        });
     }
     onResetSearchWords = async() => {
         this.host.word_list = await this.host.dbCtr.selectAllWords();
@@ -150,8 +179,6 @@ export class AppEventController implements ReactiveController {
     };
 
     onAddDefinition = async (ev:Event) => {
-        console.log("onAddDefinition");
-        console.log("onAddDefinitions");
         
         const e:DeferredEvent<string> = ev as DeferredEvent<string>;
         await this.host.dbCtr.addDefinition(e.detail).then(() => {
@@ -160,6 +187,14 @@ export class AppEventController implements ReactiveController {
         .catch((e) => e.reject(e));
     }
 
+    onUpdateDefinition = async (ev:Event) => {
+        console.log("onUpdateDefinition");
+        const e:DeferredEvent<string> = ev as DeferredEvent<string>;
+        await this.host.dbCtr.updateDefinition(e.detail).then(() => {
+            e.resolve("definition updated");
+        })
+        .catch((e) => e.reject(e));
+    }
     onDeleteDefinition = async (ev:Event) => {
         console.log("onDeleteDefinition");
         const e:DeferredEvent<string> = ev as DeferredEvent<string>;
@@ -167,6 +202,15 @@ export class AppEventController implements ReactiveController {
             e.resolve("definition removed");
         })
         .catch((e) => e.reject(e));
+    }
+
+    onAddTranslation = async (ev:Event) => {
+
+    }
+
+    onDeleteTranslation = async (ev:Event) => {
+
+
     }
     onAddLanguage = async(ev:Event) => {
         await this.languageActionWithPromise(this.host.dbCtr.addLanguage, ev)
@@ -215,6 +259,7 @@ export class AppEventController implements ReactiveController {
             reject(e);
         });
     }
+
     // onAddLanguage = async (ev:Event) => {
 
     //     var l:Language = (ev as CustomEvent).detail.lang;

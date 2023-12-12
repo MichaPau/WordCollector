@@ -1,3 +1,5 @@
+
+
 export type {AppRequestWordDataEvent} from './app-request-word-data.js';
 
 export class DeferredEvent<T> extends Event {
@@ -11,6 +13,7 @@ export class DeferredEvent<T> extends Event {
     constructor (type:string, _detail?:any) {
         super(type, {bubbles: true, composed: true});
         this.detail = _detail;
+        
         this._promise = new Promise<T>((resolve, reject) => {
             this._resolve = resolve
             this._reject = reject
@@ -29,5 +32,4 @@ export class DeferredEvent<T> extends Event {
     reject = (reason?: any): void => {
         this._reject(reason)
     }
-  
   }

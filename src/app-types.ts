@@ -49,6 +49,8 @@ export interface Translation {
   translation_id?: number,
   for_word_id: number,
   to_word_id: number,
+  for_word?:Word,
+  to_Word?:Word,
   created_at?: Date,
 }
 

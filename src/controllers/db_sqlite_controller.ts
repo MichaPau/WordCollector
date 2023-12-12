@@ -51,10 +51,13 @@ export class DBSQLiteController implements ReactiveController{
         return result;
     }
 
-    async searchForWords(value:string):Promise<Array<Word>> {
+    async searchForWords(value:string, lang_id?:number):Promise<Array<Word>> {
        
         //const q = "SELECT * from word WHERE word LIKE '% $1 %'";
-        const q = `SELECT * from word WHERE word LIKE '%${value}%' `;
+        let q = `SELECT * from word WHERE word LIKE '%${value}%' `;
+        if(lang_id) {
+            q += ` AND language = ${lang_id}`;
+        }
         let result = await this.db.select(q, [value]);
         
         return result as Array<Word>;
@@ -119,6 +122,15 @@ export class DBSQLiteController implements ReactiveController{
         }
     }
 
+    async updateDefinition(definition:Definition) {
+        const q = "UPDATE definition SET definition = $1 WHERE definition_id = $2";
+        try {
+            let result = await this.db.execute(q, [definition.definition, definition.definition_id]);
+            return result;
+        } catch(e) {
+            throw(e);
+        }
+    }
     async deleteDefinition(definition: Definition) {
         const q = "DELETE FROM definition WHERE definition_id = $1";
         try {

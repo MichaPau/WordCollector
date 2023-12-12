@@ -157,12 +157,12 @@ export class WordPanel extends LitElement implements DrawerItem {
                 <sl-input id="lang_id" name="id" label="ID:" class="short hidden" value=${this.word!.word_id!.toString()} readonly></sl-input>
                 <sl-input name="word-input" label="Word:" required spellcheck="false" value=${this.word!.word}></sl-input>
                 <div class="horizontal">
-                    <sl-select name="word-lang" label="Language" value=${this.word!.language} required>
+                    <sl-select name="word-lang" label="Language" value=${this.word!.language} required hoist>
                         ${this.lang_list.map((lang) => html`
                             <sl-option value="${lang.lang_id!}">${lang.title}</sl-option>
                         `)}
                     </sl-select>
-                    <sl-select name="word-type" label="Type" value=${this.word!.type} required>
+                    <sl-select name="word-type" label="Type" value=${this.word!.type} required hoist>
                         ${this.type_list.map((type) => html`
                             <sl-option value="${type.title!}">${type.title}</sl-option>
                         `)}

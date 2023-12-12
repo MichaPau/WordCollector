@@ -16,14 +16,19 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 
-
+import '@shoelace-style/shoelace/dist/components/details/details.js';
 import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
 import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
+import '@shoelace-style/shoelace/dist/components/alert/alert.js';
+import '@shoelace-style/shoelace/dist/components/menu/menu.js';
+import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 
-import SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
+import { SlAlert, SlDrawer } from '@shoelace-style/shoelace';
+
+// import SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
 import compStyles from './styles/default-component.styles.js';
 
@@ -198,6 +203,22 @@ export class MainApp extends LitElement {
     dialog.closeAction();
 
   }
+
+  notify(message:string, variant = 'primary', icon = 'info-circle', duration = 2500) {
+    const alert:SlAlert = Object.assign(document.createElement('sl-alert'), {
+      variant,
+      closable: true,
+      //duration: duration,
+      innerHTML: `
+        <sl-icon name="${icon}" slot="icon"></sl-icon>
+        ${message}
+      `
+    });
+
+    document.body.append(alert);
+    alert.toast();
+  }
+
   render() {
     return html`
     

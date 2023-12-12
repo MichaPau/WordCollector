@@ -8,7 +8,7 @@ import { DeferredEvent} from '../events/app-events.js';
 import * as event_types from '../controllers/event_controller.js';
 
 
-@customElement('def-panel')
+@customElement('definition-panel')
 export class DefinitionPanel extends LitElement {
 
     static styles = [
@@ -102,6 +102,6 @@ export class DefinitionPanel extends LitElement {
 
 declare global {
     interface HTMLElementTagNameMap {
-      "def-panel": DefinitionPanel,
+      "definition-panel": DefinitionPanel,
     }
   }
