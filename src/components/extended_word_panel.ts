@@ -11,7 +11,7 @@ import { SlTabGroup, SlTextarea, SlDetails } from '@shoelace-style/shoelace';
 
 import compStyles from '../styles/default-component.styles.js';
 import * as event_types from '../controllers/event_controller.js';
-import { Definition, DrawerItem, Language, Translation, Word} from '../app-types.js';
+import { Definition, DrawerItem, Language, Translation, Type, Word} from '../app-types.js';
 // import  *  as appTypes from '../app-types.js';
 
 import './trans-panel.js';
@@ -78,6 +78,9 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
 
     @property({type: Array})
     lang_list: Array<Language> = [];
+
+    @property({type: Array})
+    type_list: Array<Type> = [];
 
     @state()
     translations:Array<Translation> = [];
@@ -178,7 +181,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                         </div>
                     </sl-tab-panel>
                     <sl-tab-panel name="add_translation">
-                        <translation-panel .lang_list=${this.lang_list}></translation-panel>
+                        <translation-panel .word=${this.word} .lang_list=${this.lang_list} .type_list=${this.type_list} @app-request-word-data=${ () => this.reloadData('translation')}></translation-panel>
                     </sl-tab-panel>
                     <sl-tab-panel name="add_definition">
                         <definition-panel title="Add a definition" .lang_list=${this.lang_list} .word=${this.word} @app-request-word-data=${ () => this.reloadData('definition')}></definition-panel>

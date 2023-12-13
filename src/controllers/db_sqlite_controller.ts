@@ -54,10 +54,13 @@ export class DBSQLiteController implements ReactiveController{
     async searchForWords(value:string, lang_id?:number):Promise<Array<Word>> {
        
         //const q = "SELECT * from word WHERE word LIKE '% $1 %'";
-        let q = `SELECT * from word WHERE word LIKE '%${value}%' `;
+        let q = `SELECT *, l.title as language_title from word w INNER JOIN language l ON l.lang_id = w.language WHERE w.word LIKE '%${value}%'`;
         if(lang_id) {
-            q += ` AND language = ${lang_id}`;
+            q += ` AND w.language = ${lang_id}`;
         }
+        
+
+        console.log(q);
         let result = await this.db.select(q, [value]);
         
         return result as Array<Word>;
@@ -94,10 +97,8 @@ export class DBSQLiteController implements ReactiveController{
 
     async addWord(word:Word) {
         const checkQuery = "SELECT COUNT(*) as count FROM word WHERE word = $1 AND language = $2 AND type = $3";
-
-        //let check:Array<unknown> = await this.checkDuplicate(checkQuery, [word.word, word.language, word.type]);
         let check:Array<{count: number}> = await this.checkQuery(checkQuery, [word.word, word.language, word.type]);
-        console.log("Found: ", check[0].count);
+        
 
         if(check[0].count > 0) {
             throw new Error("Exact duplicate is already in the database.");
@@ -201,6 +202,24 @@ export class DBSQLiteController implements ReactiveController{
             return result;
         } catch (e) {
             throw(e);
+        }
+    }
+
+    async addTranslation(for_word_id:number, to_word_id:number) {
+        const checkQuery = "SELECT COUNT(*) as count FROM translation WHERE for_word_id = $1 AND to_word_id = $2";
+        let check:Array<{count: number}> = await this.checkQuery(checkQuery, [for_word_id, to_word_id]);
+
+        if(check[0].count > 0) {
+            throw new Error("Translation is already in the database.");
+        } else {
+
+            const q = "INSERT INTO translation (for_word_id, to_word_id) VALUES ($1, $2)";
+            try {
+                let result = await this.db.execute(q, [for_word_id, to_word_id]);
+                return result;
+            } catch(e) {
+                throw(e);
+            }
         }
     }
 }

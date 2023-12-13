@@ -7,6 +7,9 @@ import * as event_types from '../controllers/event_controller.js';
 import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
 import compStyles from '../styles/default-component.styles.js';
 
+// import { DeferredEvent } from '../events/app-events.js';
+// import { QueryResult } from 'tauri-plugin-sql-api';
+
 @customElement('word-panel')
 export class WordPanel extends LitElement implements DrawerItem {
 
@@ -25,7 +28,7 @@ export class WordPanel extends LitElement implements DrawerItem {
     };
 
     @property()
-    mode: "Update" | "Add" = "Add";
+    mode: "Update" | "Add" | "AddForTranslation" = "Add";
 
     static styles = [
     
@@ -101,6 +104,12 @@ export class WordPanel extends LitElement implements DrawerItem {
         // console.log(word);
         //return;
 
+        // let eventType:string;
+        // if(this.mode === "Add") eventType = event_types.ADD_WORD;
+        // else if(this.mode === "Update") eventType = event_types.UPDATE_WORD;
+        // else eventType = event_types.ADD_WORD_AND_TRANSLATION;
+
+        // const wordEvent:DeferredEvent<QueryResult> = new DeferredEvent(eventType);
         const {promise, resolve, reject} = deferred<string>();
         promise
         .then((value) => {
@@ -154,7 +163,7 @@ export class WordPanel extends LitElement implements DrawerItem {
         return html`
             <form id="word-form" >
                 <label class="invisible">Add a new word:</label>
-                <sl-input id="lang_id" name="id" label="ID:" class="short hidden" value=${this.word!.word_id!.toString()} readonly></sl-input>
+                <sl-input id="word_id" name="id" label="ID:" class="short hidden" value=${this.word!.word_id!.toString()} readonly></sl-input>
                 <sl-input name="word-input" label="Word:" required spellcheck="false" value=${this.word!.word}></sl-input>
                 <div class="horizontal">
                     <sl-select name="word-lang" label="Language" value=${this.word!.language} required hoist>

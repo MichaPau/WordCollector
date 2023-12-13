@@ -67,7 +67,7 @@ export interface DBEventOptionsItem  {
   detail: {
     "resolve": (value: any | PromiseLike<any>) => void,
     "reject": (reason?: any) => void,
-    "item": Word | Language
+    "item": Word | Language | Translation
   },
   bubbles?: boolean,
   composed?: boolean 

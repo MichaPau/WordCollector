@@ -22,13 +22,14 @@ export const UPDATE_DEFINITION = "UPDATE_DEFINITION";
 export const DELETE_DEFINITION = "DELETE_DEFINITION";
 
 export const ADD_TRANSLATION = "ADD_TRANSLATION";
+export const ADD_WORD_AND_TRANSLATION = "ADD_WORD_AND_TRANSLATION";
 export const DELETE_TRANSLATION = "DELETE_TRANSLATION";
 
 export const CANCEL_UPDATE = "CANCEL_UPDATE";
 export const CLOSE_WORD_DIALOG = "CLOSE_WORD_DIALOG";
 
 export const SEARCH_WORDS = "SEARCH_WORDS";
-export const SEARCH_WORDS_DEFERRED = "SEARCH_WORDS_DEFERRED";
+export const SEARCH_WORDS_FOR_TRANSLATION = "SEARCH_WORDS_FOR_TRANSLATIONS";
 export const RESET_SEARCH_WORDS = "RESET_SEARCH_WORDS";
 
 export const SORT_TABLE= "SORT_TABLE";
@@ -53,7 +54,7 @@ export class AppEventController implements ReactiveController {
         this.host.addEventListener(SELECT_ALL, this.onSelectAll);
 
         this.host.addEventListener(SEARCH_WORDS, this.onSearchWords);
-        this.host.addEventListener(SEARCH_WORDS_DEFERRED, this.onSearchWordsDeferred);
+        this.host.addEventListener(SEARCH_WORDS_FOR_TRANSLATION, this.onSearchWordsForTranslation);
         this.host.addEventListener(RESET_SEARCH_WORDS, this.onResetSearchWords);
 
         this.host.addEventListener(ADD_LANGUAGE, this.onAddLanguage);
@@ -66,6 +67,7 @@ export class AppEventController implements ReactiveController {
         this.host.addEventListener(DELETE_DEFINITION, this.onDeleteDefinition);
 
         this.host.addEventListener(ADD_TRANSLATION, this.onAddTranslation);
+        this.host.addEventListener(ADD_WORD_AND_TRANSLATION, this.onAddWordAndTranslation);
         this.host.addEventListener(DELETE_TRANSLATION, this.onDeleteTranslation);
 
         this.host.addEventListener(ADD_WORD, this.onAddWord);
@@ -80,7 +82,7 @@ export class AppEventController implements ReactiveController {
         this.host.removeEventListener(SELECT_ALL, this.onSelectAll);
 
         this.host.removeEventListener(SEARCH_WORDS, this.onSearchWords);
-        this.host.removeEventListener(SEARCH_WORDS_DEFERRED, this.onSearchWordsDeferred);
+        this.host.removeEventListener(SEARCH_WORDS_FOR_TRANSLATION, this.onSearchWordsForTranslation);
         this.host.removeEventListener(RESET_SEARCH_WORDS, this.onResetSearchWords);
 
         this.host.removeEventListener(ADD_WORD, this.onAddWord);
@@ -93,6 +95,7 @@ export class AppEventController implements ReactiveController {
         this.host.removeEventListener(DELETE_DEFINITION, this.onDeleteDefinition);
 
         this.host.removeEventListener(ADD_TRANSLATION, this.onAddTranslation);
+        this.host.removeEventListener(ADD_WORD_AND_TRANSLATION, this.onAddWordAndTranslation);
         this.host.removeEventListener(DELETE_TRANSLATION, this.onDeleteTranslation);
 
         this.host.removeEventListener(ADD_LANGUAGE, this.onAddLanguage);
@@ -121,7 +124,7 @@ export class AppEventController implements ReactiveController {
         var list = await this.host.dbCtr.searchForWords(value);
         this.host.word_list = list;
     }
-    onSearchWordsDeferred = async (ev:Event) => {
+    onSearchWordsForTranslation = async (ev:Event) => {
         console.log("search deferred");
         const _ev:DeferredEvent<Array<Word>> = ev as DeferredEvent<Array<Word>>;
         await this.host.dbCtr.searchForWords(_ev.detail.input, _ev.detail.lang_id)
@@ -204,6 +207,23 @@ export class AppEventController implements ReactiveController {
         .catch((e) => e.reject(e));
     }
 
+    onAddWordAndTranslation = async (ev:Event) => {
+        const _ev:DeferredEvent<string> = (ev as DeferredEvent<string>);
+        await this.host.dbCtr.addWord(_ev.detail.word).then(async (result) => {
+            if(result.lastInsertId !== 0) {
+                await this.host.dbCtr.addTranslation(_ev.detail.for_word_id, result.lastInsertId)
+                .then(() => {
+                    _ev.resolve(`Translation for ${_ev.detail.word.word} added`)
+                }).catch((e) => {
+                    _ev.reject(e);
+                });
+            }
+        }).catch((e) => {
+            _ev.reject(e);
+        });
+       
+
+    }
     onAddTranslation = async (ev:Event) => {
 
     }

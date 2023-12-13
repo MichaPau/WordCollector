@@ -248,6 +248,7 @@ export class WordTable extends LitElement {
         let dlg = new ExtendWordPanel();
         dlg.word = _word;
         dlg.lang_list = this.lang_list;
+        dlg.type_list = this.type_list;
         // dlg.lang_list = this.lang_list;
         // dlg.type_list = this.type_list;
         // dlg.mode = "Update";
