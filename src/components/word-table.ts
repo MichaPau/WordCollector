@@ -44,8 +44,8 @@ export class WordTable extends LitElement {
     @query("#word-dlg")
     wordDlg?:WordPanel;
 
-    @query("#word-drawer")
-    wordDrawer!:SlDrawer;
+    @query("#drawer")
+    drawer!:SlDrawer;
     
     @query('#delete-dialog')
     deleteDialog?:SlDialog;
@@ -147,11 +147,12 @@ export class WordTable extends LitElement {
         cancelButton.addEventListener('click', () => this.cancelDelete);
 
         this.addEventListener(event_types.CANCEL_UPDATE, () => {
-            this.wordDrawer?.hide();
+            this.drawer.replaceChildren();
+            this.drawer?.hide();
         });
         this.addEventListener(event_types.CLOSE_WORD_DIALOG, () => {
-            this.wordDrawer.replaceChildren();
-            this.wordDrawer.hide();
+            this.drawer.replaceChildren();
+            this.drawer.hide();
         });
         this.deleteDialog!.addEventListener('sl-request-close', event => {
             if (event.detail.source === 'overlay') {
@@ -166,11 +167,6 @@ export class WordTable extends LitElement {
                     (sortButton as TableSortIcon).sort_state = "neutral";
                 }
             }
-            // this.sortButtons.map((item:TableSortIcon) => {
-            //     if(item !== emit_item) {
-            //         item.sort_state = "neutral";
-            //     }
-            // });
         });
 
     }
@@ -221,11 +217,11 @@ export class WordTable extends LitElement {
 
     async onDrawerClose(ev:Event) {
         
-        console.log("onDrawerClose");
+        console.log("WordTable::onDrawerClose");
         const dialog:DrawerItem = (ev.currentTarget as SlDrawer).firstElementChild! as DrawerItem;
         await dialog.closeAction();
-        this.wordDrawer.removeChild(dialog);
-
+        //this.wordDrawer.removeChild(dialog);
+        this.drawer.replaceChildren();
 
     
     }
@@ -238,11 +234,11 @@ export class WordTable extends LitElement {
         dlg.type_list = this.type_list;
         dlg.mode = "Update";
 
-        this.wordDrawer.appendChild(dlg);
-        this.wordDrawer.label = "Update word.";
-        this.wordDrawer.placement = "start";
-        this.wordDrawer.style.cssText = "--size: 40%";
-        this.wordDrawer.show();
+        this.drawer.appendChild(dlg);
+        this.drawer.label = "Update word.";
+        this.drawer.placement = "start";
+        this.drawer.style.cssText = "--size: 40%";
+        this.drawer.show();
     }
     openDetails(_word:Word) {
         let dlg = new ExtendWordPanel();
@@ -253,11 +249,11 @@ export class WordTable extends LitElement {
         // dlg.type_list = this.type_list;
         // dlg.mode = "Update";
 
-        this.wordDrawer.appendChild(dlg);
-        this.wordDrawer.label = _word.word;
-        this.wordDrawer.placement = "bottom";
-        this.wordDrawer.style.cssText = "--size: 90%";
-        this.wordDrawer.show();
+        this.drawer.appendChild(dlg);
+        this.drawer.label = `${_word.word} (${_word.language_title})`;
+        this.drawer.placement = "bottom";
+        this.drawer.style.cssText = "--size: 90%";
+        this.drawer.show();
     }
 
     addDefinition(_word:Word) {
@@ -267,7 +263,7 @@ export class WordTable extends LitElement {
     render() {
         return html`
         
-        <sl-drawer id="word-drawer" @sl-request-close=${this.onDrawerClose}>
+        <sl-drawer id="drawer" @sl-request-close=${this.onDrawerClose}>
             <!-- <word-dialog id="word-dlg" .lang_list=${this.lang_list} .type_list=${this.type_list} mode="Update"></word-dialog> -->
         </sl-drawer>
         <sl-dialog label="Delete ${this.deleteWord?.word}" id="delete-dialog">

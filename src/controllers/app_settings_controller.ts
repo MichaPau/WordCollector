@@ -1,13 +1,19 @@
+import { appWindow } from "@tauri-apps/api/window";
+import { confirm } from '@tauri-apps/api/dialog';
+
 import { ReactiveController, ReactiveControllerHost } from "lit";
 import { setDefaultAnimation } from "@shoelace-style/shoelace/dist/utilities/animation-registry.js";
 import { SorterItem, WordIndexable } from "../app-types";
 import { MainApp } from "../main";
+import { UnlistenFn } from "@tauri-apps/api/event";
+
 
 
 export class AppSettingsController implements ReactiveController{
     
     private host: MainApp;
 
+    private appCloseRequest?:UnlistenFn;
     //private sort_tables:Array<string> = ["word_id", "word", "language", "type", "created_at"];
 
     private sorters:Array<SorterItem> = [{column: "word_id", reversed: false , type: "number"}];
@@ -15,8 +21,20 @@ export class AppSettingsController implements ReactiveController{
     constructor(host: ReactiveControllerHost & MainApp) {
         this.host = host;
         this.host.addController(this);
+        this.init()
+       
     }
 
+    async init() {
+        this.appCloseRequest = await appWindow.onCloseRequested(async (ev) => {
+            console.log("app close requested");
+            // const confirmed = await confirm('Are you sure?');
+            // if (!confirmed) {
+            //     // user did not confirm closing the window; let's prevent it
+            //     ev.preventDefault();
+            // }
+        });
+    }
     updateSort(sortItem: SorterItem) {
         
         const i = this.sorters.findIndex(item => item.column === sortItem.column);
@@ -73,6 +91,7 @@ export class AppSettingsController implements ReactiveController{
         });
     }
     hostDisconnected(): void {
-       
+        if(this.appCloseRequest)
+            this.appCloseRequest();
     }
 }

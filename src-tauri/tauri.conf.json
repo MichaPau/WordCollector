@@ -12,6 +12,12 @@
   },
   "tauri": {
     "allowlist": {
+      "window":{
+        "close": true
+      },
+      "dialog": {
+        "confirm": true
+      },
       "all": false,
       "shell": {
         "all": false,
@@ -40,6 +46,7 @@
         "title": "WordCollector",
         "width": 1000,
         "height": 614
+        
       }
     ]
   }

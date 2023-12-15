@@ -73,8 +73,8 @@ export class DBSQLiteController implements ReactiveController{
         const q = "SELECT w.*, l.title as language_title, unixepoch(w.created_at) as created_timestamp \
         FROM word w INNER JOIN language l ON l.lang_id = w.language WHERE w.word_id = $1 LIMIT 1";
 
-        const q_def  = "SELECT * from definition WHERE for_word_id = $1";
-        const q_trans = "SELECT * from translation WHERE for_word_id = $1";
+        const q_def  = "SELECT * FROM definition WHERE for_word_id = $1";
+        const q_trans = "SELECT * FROM translation WHERE for_word_id = $1";
 
 
         let [wordResult, defResult, transResult] = await Promise.all([
@@ -87,8 +87,21 @@ export class DBSQLiteController implements ReactiveController{
         w.definitions = defResult as Array<Definition>;
         w.translations = transResult as Array<Translation>;
 
+        for(let transItem of w.translations) {
+            let wordResult = await this.getWordFromId(transItem.to_word_id);
+            
+            if(wordResult.length > 0)
+                transItem.to_Word = wordResult[0];
+            
+        }
+
         return w;
 
+    }
+    async getWordFromId(id:number):Promise<Array<Word>> {
+        let result = await this.db.select('SELECT *, l.title as language_title FROM word INNER JOIN language l ON l.lang_id = language WHERE word_id = $1', [id]);
+        console.log(result);
+        return result as Array<Word>;
     }
     async checkQuery<T>(q:string, values:Array<string | number>):Promise<T> {
         let result = await this.db.select(q, values);

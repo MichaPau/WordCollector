@@ -32,11 +32,11 @@ export class ActionBar extends LitElement {
     testButton?:SlButton;
 
     addWord() {
-        this.dispatchEvent(new Event("openAddWordDlg", {bubbles: true, composed: true}));
+        this.dispatchEvent(new Event(event_types.OPEN_WORD_DRAWER, {bubbles: true, composed: true}));
     }
 
     addLanguage() {
-        this.dispatchEvent(new Event("openAddLangDlg", {bubbles: true, composed: true}));
+        this.dispatchEvent(new Event(event_types.OPEN_LANGUAGE_DRAWER, {bubbles: true, composed: true}));
     }
 
     onSearchInput() {

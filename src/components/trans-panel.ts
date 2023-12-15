@@ -12,6 +12,8 @@ import { Language, Type, Word } from '../app-types.js';
 import { DeferredEvent } from '../events/app-events.js';
 
 import './word-panel.js';
+import './word-form.js';
+import { WordForm } from './word-form.js';
 
 
 
@@ -43,16 +45,22 @@ export class TranslationPanel extends LitElement {
     ];
     
     @query("#lookup-result-container")
-    lookupResultContainer?:HTMLElement;
+    lookupResultContainer!:HTMLElement;
 
     @query("#search-input")
-    searchInput?:SlInput;
+    searchInput!:SlInput;
 
     @query("#lookup-menu")
-    lookupMenu?:SlMenu;
+    lookupMenu!:SlMenu;
 
     @query("#trans-lang")
-    transLang?:SlInput;
+    transLang!:SlInput;
+
+    @query("#word-form")
+    wordForm!:WordForm;
+
+    @query("#result-info")
+    resultInfo!:HTMLElement;
 
     @property({type: Object})
     word?: Word;
@@ -74,12 +82,12 @@ export class TranslationPanel extends LitElement {
             }
         });
 
-        var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
-        form.addEventListener("submit", this.addWord);
+        // var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
+        // form.addEventListener("submit", this.addWord);
+        //this.addEventListener(event_types.)
     }
     private addWord = (ev:Event) => {
         ev.preventDefault();
-        //console.log("onAddWord:", this);
         
         var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
         var result:HTMLElement = this.shadowRoot!.querySelector("#result-info")!;
@@ -142,6 +150,31 @@ export class TranslationPanel extends LitElement {
             //this.dispatchEvent(new CustomEvent(event_types.SEARCH_WORDS, {bubbles: true, composed: true, detail: value}));
         }
     }
+    onWordSubmit(_ev:Event) {
+        const ev:CustomEvent = (_ev as CustomEvent);
+        this.resultInfo.innerHTML = "";
+
+        const addEvent:DeferredEvent<string> = new DeferredEvent<string>(event_types.ADD_WORD_AND_TRANSLATION, 
+            {
+                for_word_id: this.word!.word_id,
+                word: ev.detail as Word
+            }
+        );
+
+        const p = addEvent.promise;
+        p.then(() => {
+            this.dispatchEvent(new CustomEvent('app-request-word-data', {bubbles: true, composed: true}));
+        }).catch((e) => {
+            console.log("Promise rejected:", e);
+            this.resultInfo.className = "error";
+            this.resultInfo.innerHTML = "Error: "+e;
+        });
+
+        this.dispatchEvent(addEvent);
+    }
+    onWordCancel() {
+        this.wordForm.reset();
+    }
     render() {
         return html`
             <div id="details-group-container">
@@ -159,10 +192,7 @@ export class TranslationPanel extends LitElement {
                 </div>
                 </sl-details>
                 <sl-details summary="Create new word.">
-                    <form id="word-form" >
-                        <!-- <label class="invisible">Add a new word:</label>
-                            <sl-input id="lang_id" name="id" label="ID:" class="short hidden"  readonly></sl-input> 
-                        -->
+                    <!-- <form id="word-form" >
                         <sl-input name="word-input" label="Word:" required spellcheck="false"></sl-input>
                         <div class="horizontal">
                             <sl-select name="word-lang" label="Language"  required hoist>
@@ -176,12 +206,15 @@ export class TranslationPanel extends LitElement {
                                 `)}
                             </sl-select>
                         </div>
-                        <!-- <sl-button type="submit" variant="primary" class="submit-button">Add</sl-button> -->
                         <div class="button-bar">
                             <sl-button type="submit" variant="primary" class="submit-button">Add Translation</sl-button>
                         </div>
-                        <div id="result-info"></div>
-                    </form>
+                    </form> -->
+                    <word-form id="word-form" .lang_list=${this.lang_list} .type_list=${this.type_list}
+                        submitLabel="New Word" cancellable
+                        @on-word-submit=${this.onWordSubmit} @on-word-cancel=${this.onWordCancel}
+                    ></word-form>
+                    <div id="result-info"></div>
                 </sl-details>
             </div>
         `;

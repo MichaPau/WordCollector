@@ -1,15 +1,17 @@
 // import { invoke } from "@tauri-apps/api/tauri";
 
-import {html, css, LitElement} from 'lit';
+import { html, css, LitElement } from 'lit';
 
-import {customElement, property, state} from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
-import {DBSQLiteController} from './controllers/db_sqlite_controller.js';
-import {AppEventController} from './controllers/event_controller.js';
+import { DBSQLiteController } from './controllers/db_sqlite_controller.js';
+import { AppEventController } from './controllers/event_controller.js';
+import { AppSettingsController } from './controllers/app_settings_controller.js';
 
 import { Language, Table, Word, Type, DrawerItem } from './app-types.js';
 
-//import '@shoelace-style/shoelace/dist/themes/light.css';
+import { SlAlert, SlDrawer } from '@shoelace-style/shoelace';
+
 
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -26,18 +28,14 @@ import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/menu/menu.js';
 import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 
-import { SlAlert, SlDrawer } from '@shoelace-style/shoelace';
-
-// import SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
-
 import compStyles from './styles/default-component.styles.js';
+import { OPEN_WORD_DRAWER, OPEN_LANGUAGE_DRAWER } from './controllers/event_controller.js';
 
 import './components/lang-panel.js';
 import './pages/words.js';
-
 import './components/action-bar.js';
-import { AppSettingsController } from './controllers/app_settings_controller.js';
-//import { QueryResult } from 'tauri-plugin-sql-api';
+
+
 
 @customElement('main-app')
 export class MainApp extends LitElement {
@@ -48,13 +46,10 @@ export class MainApp extends LitElement {
     #app-container {
       height: 100%;
       width: 100%;
-      /* display: flex; */
-      /* overflow: hidden; */
       border: 2px solid black;
       padding: var(--main-padding);
-      /* overflow-y: scroll; */
-      
     }
+
     #split-panel {
       height: 100%;
       max-height: 100%;
@@ -63,45 +58,24 @@ export class MainApp extends LitElement {
    
     #left-pane {
       padding: var(--main-padding);
-    
     }
 
     #right-pane {
-      /*grid-column: col-start 3 / span 5;
-      grid-row: 1;*/
       padding: var(--main-padding);
       height: 100%;
       max-height: 100%;
       overflow: hidden;
-     
-      /* box-sizing: border-box; */
-      //overflow: scroll;
     }
 
     #word-panel {
-      /* display: flex;
-      flex-direction: column; */
       overflow: hidden;
       height: 100%;
-      //background-color: orange;
     }
     .border-check {
       border: 2px solid black;
     }
-    /* sl-tab-group,
-    sl-tab-panel,
-    sl-split-panel,
-    sl-split-panel::part(panel),
-    sl-tab-panel::part(base),
-    sl-tab-group::part(base),
-    sl-tab-group::part(body) {
-      height: 100%;
-      max-height:100%;
-      --padding: 0;
-    } */
-
+    
     .panel-container {
-
       display: grid;
       grid-template-rows: 3em 1fr;
       gap: var(--main-padding);
@@ -109,34 +83,25 @@ export class MainApp extends LitElement {
       height: 100%;
       max-height: 100%;
       overflow: hidden;
-      
-      /* border: 1px solid red; */
     }
+
     .full-height {
       height: 100%;
     }
-    /* sl-tab-panel, sl-tab-group, sl-split-panel {
-     
-      height: 100%;
-    }*/
-    
 
     action-bar {
-      /* display: block; */
       flex: 0 0 3em;
     }
+
     word-edit {
       display: block;
-      //height: 100%;
       min-height: 0;
-      /* overflow-y: auto; */
     }
+
     sl-drawer {
       --size: 50%;
     }
   `];
-
-    
 
   public dbCtr = new DBSQLiteController(this);
   private eventCtr = new AppEventController(this);
@@ -160,15 +125,10 @@ export class MainApp extends LitElement {
   @state()
   testState = 0;
 
-  
-
-
   constructor() {
     super();
-    console.log("constructor");
-    
-
   }
+
   async connectedCallback(): Promise<void> {
 
     super.connectedCallback();
@@ -179,21 +139,16 @@ export class MainApp extends LitElement {
     this.word_list = await this.dbCtr.selectAllWords();
     this.lang_list = await this.dbCtr.selectAll("language");
     this.type_list = await this.dbCtr.selectAll("word_type");
-
-    //this.addEventListener("on_add_language", this.addLanguageHandler);
-    //this.addEventListener("on_add_word", this.addWordHandler);
     
-    this.addEventListener("openAddWordDlg", () => {
+    this.addEventListener(OPEN_WORD_DRAWER, () => {
       const drawer:SlDrawer = this.shadowRoot!.querySelector<SlDrawer>('#word-drawer')!;
       drawer.show();
     });
-    this.addEventListener("openAddLangDlg", () => {
+    this.addEventListener(OPEN_LANGUAGE_DRAWER, () => {
       const drawer:SlDrawer = this.shadowRoot!.querySelector<SlDrawer>('#lang-drawer')!;
       drawer.show();
     });
-    //this.addEventListener("on_test_promise", this.testPromiseHandler);
 
-    //console.log(this.appCtr.getDBStatus());
   }
   
 
@@ -201,14 +156,13 @@ export class MainApp extends LitElement {
     console.log("onDrawerClose");
     const dialog:DrawerItem = (ev.currentTarget as SlDrawer).firstElementChild! as DrawerItem;
     dialog.closeAction();
-
   }
 
   notify(message:string, variant = 'primary', icon = 'info-circle', duration = 2500) {
     const alert:SlAlert = Object.assign(document.createElement('sl-alert'), {
       variant,
       closable: true,
-      //duration: duration,
+      duration: duration,
       innerHTML: `
         <sl-icon name="${icon}" slot="icon"></sl-icon>
         ${message}

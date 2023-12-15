@@ -4,8 +4,9 @@ import { Language, Word } from "../app-types";
 import { QueryResult } from "tauri-plugin-sql-api";
 import { DeferredEvent } from "../events/app-events";
 
-export const testEvent = "TEST_EVENT";
 
+
+// DB Events
 export const SELECT_ALL = "SELECT_ALL";
 
 export const ADD_LANGUAGE = "ADD_LANGUAGE";
@@ -25,6 +26,12 @@ export const ADD_TRANSLATION = "ADD_TRANSLATION";
 export const ADD_WORD_AND_TRANSLATION = "ADD_WORD_AND_TRANSLATION";
 export const DELETE_TRANSLATION = "DELETE_TRANSLATION";
 
+//APP flow events
+export const testEvent = "TEST_EVENT";
+
+export const OPEN_WORD_DRAWER = "OPEN_WORD_DRAWER";
+export const OPEN_LANGUAGE_DRAWER = "OPEN_LANGUAGE_DRAWER";
+
 export const CANCEL_UPDATE = "CANCEL_UPDATE";
 export const CLOSE_WORD_DIALOG = "CLOSE_WORD_DIALOG";
 
@@ -35,10 +42,12 @@ export const RESET_SEARCH_WORDS = "RESET_SEARCH_WORDS";
 export const SORT_TABLE= "SORT_TABLE";
 export const SORT_ICON_ACTIVE = "SORT_ICON_ACTIVE";
 
+// export const WORD_FORM_SUBMIT = "WORD_FORM_SUBMIT";
+// export const WORD_FORM_CANCEL = "WORD_FORM_CANCEL";
+
 export class AppEventController implements ReactiveController {
     private host: MainApp;
    
-
 
     constructor(host: ReactiveControllerHost & MainApp) {
         this.host = host;

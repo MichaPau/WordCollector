@@ -161,7 +161,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                             <sl-details id="translation" summary="Translations (${this.translations.length})">
                                 <ul>
                                 ${this.translations.map((item:Translation) => html`
-                                    <li> ${item.for_word_id} - ${item.to_word_id} </li>
+                                    <li> ${item.to_word_id} - ${item.to_Word?.word} - ${item.to_Word?.language_title}</li>
                                 `)}
                                 </ul>
                             </sl-details>

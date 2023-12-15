@@ -1,7 +1,15 @@
 
 
-export type {AppRequestWordDataEvent} from './app-request-word-data.js';
+//export type {AppRequestWordDataEvent} from './app-request-word-data.js';
 
+declare global {
+    interface GlobalEventHandlersEventMap {
+      'app-request-word-data': CustomEvent;
+      'on-word-submit': CustomEvent,
+      'on-word-cancel': CustomEvent,
+    }
+  }
+  
 export class DeferredEvent<T> extends Event {
 
     private readonly _promise: Promise<T>
