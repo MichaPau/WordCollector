@@ -25,6 +25,12 @@ import { TableSortIcon } from './table-sort-icon.js';
 //setBasePath('/assets/icons');
 setBasePath('./src');
 console.log("path:", getBasePath());
+
+// registerIconLibrary('default', {
+//     resolver: (name) =>
+//       `../node_modules/@shoelace-style/shoelace/dist/assets/icons/${name}.svg`,
+//   });
+  
 @customElement('word-table')
 export class WordTable extends LitElement {
 

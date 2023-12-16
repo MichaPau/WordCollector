@@ -1,8 +1,5 @@
-import { LitElement, html, css, PropertyValueMap } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-
-// import '@shoelace-style/shoelace/dist/components/details/details.js';
-// import '@shoelace-style/shoelace/dist/components/input/input.js';
+import { LitElement, html, css, PropertyValueMap, nothing } from 'lit';
+import { customElement, property, state, query } from 'lit/decorators.js';
 
 import { SlInput, SlMenu, SlMenuItem, SlDetails } from '@shoelace-style/shoelace';
 
@@ -14,6 +11,7 @@ import { DeferredEvent } from '../events/app-events.js';
 import './word-panel.js';
 import './word-form.js';
 import { WordForm } from './word-form.js';
+import { CLOSE_TIMEOUT_MS } from '../app-constants.js';
 
 
 
@@ -28,24 +26,38 @@ export class TranslationPanel extends LitElement {
             justify-content: center;
             gap: var(--main-padding);
             width: 100%;
-            border: 1px solid black;
+            //border: 1px solid black;
         }
 
         #lookup-result-container {
             display: flex;
             flex-direction: column;
             gap: var(--main-padding);
-            border: 1px solid black;
+            //border: 1px solid black;
         }
 
+        #lookup-selected {
+            display: flex;
+            justify-content: space-between;
+        }
         .search-input {
             flex: 1 1 70%;
+        }
+
+        .hide-menu-border {
+            border: none;
+        }
+        .show-menu-border {
+            border: solid var(--sl-panel-border-width) var(--sl-panel-border-color);
         }
       `
     ];
     
     @query("#lookup-result-container")
     lookupResultContainer!:HTMLElement;
+
+    // @query("#lookup-selected")
+    // lookupSelected!:HTMLElement;
 
     @query("#search-input")
     searchInput!:SlInput;
@@ -71,6 +83,9 @@ export class TranslationPanel extends LitElement {
     @property({type: Array})
     type_list: Array<Type> = [];
 
+    @state()
+    selectedWord?:Word;
+
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
        
         const container = this.shadowRoot!.querySelector('#details-group-container')!;
@@ -81,50 +96,13 @@ export class TranslationPanel extends LitElement {
             [...container.querySelectorAll('sl-details')].map(details => (details.open = event.target === details));
             }
         });
-
-        // var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
-        // form.addEventListener("submit", this.addWord);
-        //this.addEventListener(event_types.)
     }
-    private addWord = (ev:Event) => {
-        ev.preventDefault();
-        
-        var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
-        var result:HTMLElement = this.shadowRoot!.querySelector("#result-info")!;
-        result.innerHTML = "";
-        
-        const formData = new FormData(form!);
-        const formObj = Object.fromEntries(formData.entries());
-        var word:Word = {
-            "word": formObj["word-input"] as string, 
-            "language": parseInt(formObj["word-lang"] as string),
-            "type": formObj["word-type"] as string
-        };
-
-        const addEvent:DeferredEvent<string> = new DeferredEvent<string>(event_types.ADD_WORD_AND_TRANSLATION, 
-            {
-                for_word_id: this.word!.word_id,
-                word: word
-            }
-        );
-
-        const p = addEvent.promise;
-        p.then(() => {
-            this.dispatchEvent(new CustomEvent('app-request-word-data', {bubbles: true, composed: true}));
-        }).catch((e) => {
-            console.log("Promise rejected:", e);
-            result.className = "error";
-            result.innerHTML = "Error: "+e;
-        });
-
-        this.dispatchEvent(addEvent);
-
-
-    }
+    
     onSearchInput() {
         console.log("onSearchINput");
         let value = this.searchInput?.value;
 
+        this.selectedWord = undefined;
         this.lookupMenu!.replaceChildren();
 
         if(value && value.length > 1) {
@@ -134,9 +112,12 @@ export class TranslationPanel extends LitElement {
             const resultP = searchEv.promise;
 
             resultP.then((result) => {
+                this.lookupMenu.classList.replace('hide-menu-border', 'show-menu-border');
                 result.map((word) => {
+                    //console.log(word);
                     const elem:SlMenuItem = document.createElement('sl-menu-item');
-                    elem.value = word.word_id!.toString();
+                    //elem.value = word.word_id!.toString();
+                    elem.value = JSON.stringify(word);
 
                     //const elem:SlMenuItem = new SlMenuItem();
                     elem.innerText = word.word + " - " + word.type + " - " + word.language_title;
@@ -150,6 +131,13 @@ export class TranslationPanel extends LitElement {
             //this.dispatchEvent(new CustomEvent(event_types.SEARCH_WORDS, {bubbles: true, composed: true, detail: value}));
         }
     }
+    onSearchSelect(ev:CustomEvent) {
+        const item = ev.detail.item;
+        //console.log("Selected:", item.value);
+        this.lookupMenu!.replaceChildren();
+        this.lookupMenu.classList.replace('show-menu-border', 'hide-menu-border');
+        this.selectedWord = JSON.parse(item.value);
+    }
     onWordSubmit(_ev:Event) {
         const ev:CustomEvent = (_ev as CustomEvent);
         this.resultInfo.innerHTML = "";
@@ -162,8 +150,14 @@ export class TranslationPanel extends LitElement {
         );
 
         const p = addEvent.promise;
-        p.then(() => {
-            this.dispatchEvent(new CustomEvent('app-request-word-data', {bubbles: true, composed: true}));
+        p.then((result) => {
+            console.log(result);
+            this.resultInfo.className = "success";
+            this.resultInfo.innerHTML = result;
+            setTimeout(() => {
+                this.dispatchEvent(new CustomEvent('app-request-word-data', {bubbles: true, composed: true}));
+             }, CLOSE_TIMEOUT_MS);
+            
         }).catch((e) => {
             console.log("Promise rejected:", e);
             this.resultInfo.className = "error";
@@ -187,8 +181,17 @@ export class TranslationPanel extends LitElement {
                             `)}
                         </sl-select>
                     </div>
+                
+                    ${this.selectedWord ? 
+                        html `
+                            <div id="lookup-selected">
+                                <div>${this.selectedWord.word} - ${this.selectedWord.language_title} - ${this.selectedWord.type}</div>
+                                <sl-button>Add</sl-button>
+                            </div>
+                        ` : nothing}
+                
                 <div id="lookup-result-container">
-                        <sl-menu id="lookup-menu"></sl-menu>
+                    <sl-menu class="hide-menu-border" id="lookup-menu" @sl-select=${this.onSearchSelect}></sl-menu>
                 </div>
                 </sl-details>
                 <sl-details summary="Create new word.">

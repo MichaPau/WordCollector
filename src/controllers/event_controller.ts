@@ -112,17 +112,43 @@ export class AppEventController implements ReactiveController {
         this.host.removeEventListener(DELETE_LANGUAGE, this.onDeleteLanguage);
     }
 
-    onTestEvent = (e:Event) => {
+    onTestEvent = async (e:Event) => {
         
-        const ev:DeferredEvent<number> = e as DeferredEvent<number>;
-        this.host.testState++;
-        if(ev.detail < 0.5) {
-            ev.resolve(this.host.testState);
-            this.host.notify("The score is " + this.host.testState, "success");
+        const _ev:DeferredEvent<number> = e as DeferredEvent<number>;
+
+        const values = ["test15", "test1"];
+        const r1 = this.host.dbCtr.testAllSetteled(values[0]);
+        const r2 = this.host.dbCtr.testAllSetteled(values[1]);
+        //.then((r) => console.log(r)).catch((e) => console.log(e))
+        const dbPromises = [r1, r2];
+
+
+        let retMessage = "";
+
+        const results = await Promise.allSettled(dbPromises);
+        results.forEach((result) => {
+            if(result.status === "fulfilled") {
+                retMessage += result.value.toString() +"\n";
+            } else {
+                retMessage += result.reason + "\n";
+            }
+        
+        });
+
+        if (results.some(item => item.status === "fulfilled")) {
+            _ev.resolve(1);
         } else {
-            ev.reject("no");
-            this.host.notify("Luck is a bird..", "warning");
+            _ev.reject(retMessage);
         }
+       
+
+        // //test begin - commit - rollback transactions
+        // let result:boolean = await this.host.dbCtr.testTableQuery(values);
+        // if(result) {
+        //     _ev.resolve(1);
+        // } else {
+        //     _ev.reject("no");
+        // }
     }
 
     onSortTable = (ev:Event) => {
@@ -145,10 +171,13 @@ export class AppEventController implements ReactiveController {
         });
     }
     onResetSearchWords = async() => {
+        this.reloadWordList();
+    }
+
+    async reloadWordList() {
         this.host.word_list = await this.host.dbCtr.selectAllWords();
         this.host.settingsCtr.sortWords();
     }
-
     onSelectAll = async (ev:Event) => {
         let table = (ev as CustomEvent).detail.table;
         let column = (ev as CustomEvent).detail.column;
@@ -219,13 +248,29 @@ export class AppEventController implements ReactiveController {
     onAddWordAndTranslation = async (ev:Event) => {
         const _ev:DeferredEvent<string> = (ev as DeferredEvent<string>);
         await this.host.dbCtr.addWord(_ev.detail.word).then(async (result) => {
+
             if(result.lastInsertId !== 0) {
-                await this.host.dbCtr.addTranslation(_ev.detail.for_word_id, result.lastInsertId)
-                .then(() => {
-                    _ev.resolve(`Translation for ${_ev.detail.word.word} added`)
-                }).catch((e) => {
-                    _ev.reject(e);
+                
+                let result1 = this.host.dbCtr.addTranslation(_ev.detail.for_word_id, result.lastInsertId);
+                let result2 = this.host.dbCtr.addTranslation(result.lastInsertId, _ev.detail.for_word_id)
+                
+                const resultAll = await Promise.allSettled([result1, result2]);
+                let retMessage = "";
+                resultAll.forEach((result) => {
+                    if(result.status === "fulfilled") {
+                        retMessage += result.value.toString() +"\n";
+                    } else {
+                        retMessage += result.reason + "\n";
+                    }
+                
                 });
+        
+                if (resultAll.some(item => item.status === "fulfilled")) {
+                    _ev.resolve(retMessage);
+                    this.reloadWordList();
+                } else {
+                    _ev.reject(retMessage);
+                }
             }
         }).catch((e) => {
             _ev.reject(e);
@@ -248,7 +293,12 @@ export class AppEventController implements ReactiveController {
     }
     onUpdateLanguage = async(ev:Event) => {
         await this.languageActionWithPromise(this.host.dbCtr.updateLanguage, ev)
-            .then(() => { console.log("onUpdateLanguage finished")})
+            .then(async () => { 
+                console.log("onUpdateLanguage finished");
+                //this.host.word_list = await this.host.dbCtr.selectAllWords();
+                this.reloadWordList();
+
+            })
             .catch((e:unknown) => console.log("onUpdateLanguageError:",e));
     }
     onDeleteLanguage = async(ev:Event) => {
@@ -280,7 +330,8 @@ export class AppEventController implements ReactiveController {
             let resolve =  (ev as CustomEvent).detail.resolve;
             resolve(result);
             (async () => {
-                this.host.word_list = await this.host.dbCtr.selectAllWords();
+                //this.host.word_list = await this.host.dbCtr.selectAllWords();
+                this.reloadWordList();
             })();
         })
         .catch((e:unknown) => {

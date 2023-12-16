@@ -51,7 +51,10 @@ export class ActionBar extends LitElement {
         //this.dispatchEvent(new Event(event_types.testEvent, {bubbles: true, composed: true}));
         let testEvent = new DeferredEvent<number>(event_types.testEvent, Math.random());
         let p:Promise<number> = testEvent.promise;
-        p.then((value:number) => this.testButton!.innerHTML = "Test:"+value).catch((e) => this.testButton!.innerHTML = e);
+        p.then((value:number) => this.testButton!.innerHTML = "Test:"+value).catch((e) => {
+            console.log(e);
+            this.testButton!.innerHTML = e
+        });
         this.dispatchEvent(testEvent);
     }
     render() {

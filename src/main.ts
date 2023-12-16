@@ -183,7 +183,7 @@ export class MainApp extends LitElement {
       <sl-drawer label="Language settings:" placement="start" class="drawer-placement-bottom" id="lang-drawer" @sl-request-close=${this.onDrawerClose}>
         <lang-panel .lang_list=${this.lang_list}></lang-panel>
       </sl-drawer>
-        <sl-split-panel id="split-panel" position="20">
+        <sl-split-panel id="split-panel" position="25">
           <div id="left-pane" slot="start">${this.testState}</div>
           <div id="right-pane" slot="end">
             <div class="panel-container">

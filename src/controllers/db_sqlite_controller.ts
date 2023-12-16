@@ -1,6 +1,6 @@
 import { LitElement, ReactiveController, ReactiveControllerHost } from "lit";
 
-import Database from "tauri-plugin-sql-api";
+import Database, { QueryResult } from "tauri-plugin-sql-api";
 
 
 import { Word, Language, Definition, Translation } from "../app-types";
@@ -34,6 +34,65 @@ export class DBSQLiteController implements ReactiveController{
         this.db = await Database.load("sqlite:C:\\Data\\projects\\web\\Tauri\\WordCollector\\src-tauri\\data\\words.db");
     }
 
+    async begin() {
+        return await this.db.execute('BEGIN');
+    }
+    async commit() {
+        return await this.db.execute('COMMIT');
+    }
+    async rollback() {
+        return await this.db.execute('ROLLBACK');
+    }
+    
+    async testTableQuery(values:Array<string>):Promise<boolean> {
+
+        console.log("sqlliteController::testTableQuery");
+        
+        await this.begin();
+        let commit:boolean = true;
+
+        await Promise.all(values.map(async (value, index) => {
+            const checkQuery = "SELECT COUNT(*) as count FROM testTable WHERE value = $1";
+            let check:Array<{count: number}> = await this.checkQuery(checkQuery, [value]);
+            
+            if(check[0].count > 0) {
+                //throw new Error("Exact duplicate is already in the database.");
+                commit = false;
+            } else {
+                const q2 = "INSERT INTO testTable (value) VALUES ($1)";
+                await this.db.execute(q2, [value]);
+            }
+        }));
+        
+        if(commit) {
+            await this.commit();
+            return true;
+
+        } else {
+            await this.rollback();
+            return false;
+        }
+
+    }
+
+    async testAllSetteled(value:string):Promise<QueryResult> {
+        const checkQuery = "SELECT COUNT(*) as count FROM testTable WHERE value = $1";
+        let check:Array<{count: number}> = await this.checkQuery(checkQuery, [value]);
+        
+        if(check[0].count > 0) {
+            //throw new Error("Exact duplicate is already in the database.");
+            throw new Error("entry exists already");
+
+        } else {
+            const q2 = "INSERT INTO testTable (value) VALUES ($1)";
+            const result = await this.db.execute(q2, [value]);
+            return result;
+        }
+    }
+    async checkQuery<T>(q:string, values:Array<string | number>):Promise<T> {
+        let result = await this.db.select(q, values);
+        return result as T;
+    }
     async selectAll<T>(table:string, column?:string, value?:string): Promise<Array<T>> {
         let q = "SELECT * FROM " + table;
 
@@ -54,7 +113,7 @@ export class DBSQLiteController implements ReactiveController{
     async searchForWords(value:string, lang_id?:number):Promise<Array<Word>> {
        
         //const q = "SELECT * from word WHERE word LIKE '% $1 %'";
-        let q = `SELECT *, l.title as language_title from word w INNER JOIN language l ON l.lang_id = w.language WHERE w.word LIKE '%${value}%'`;
+        let q = `SELECT w.*, l.title as language_title from word w INNER JOIN language l ON l.lang_id = w.language WHERE w.word LIKE '%${value}%'`;
         if(lang_id) {
             q += ` AND w.language = ${lang_id}`;
         }
@@ -103,10 +162,7 @@ export class DBSQLiteController implements ReactiveController{
         console.log(result);
         return result as Array<Word>;
     }
-    async checkQuery<T>(q:string, values:Array<string | number>):Promise<T> {
-        let result = await this.db.select(q, values);
-        return result as T;
-    }
+    
 
     async addWord(word:Word) {
         const checkQuery = "SELECT COUNT(*) as count FROM word WHERE word = $1 AND language = $2 AND type = $3";
