@@ -279,11 +279,50 @@ export class AppEventController implements ReactiveController {
 
     }
     onAddTranslation = async (ev:Event) => {
+        console.log("onAddTransaltion");
+        const _ev:DeferredEvent<string> = (ev as DeferredEvent<string>);
 
+        let result1 = this.host.dbCtr.addTranslation(_ev.detail.for_word_id, _ev.detail.word.word_id);
+        let result2 = this.host.dbCtr.addTranslation(_ev.detail.word.word_id, _ev.detail.for_word_id)
+        
+        const resultAll = await Promise.allSettled([result1, result2]);
+        let retMessage = "";
+        resultAll.forEach((result) => {
+            if(result.status === "fulfilled") {
+                retMessage += "Translation added." +"\n";
+            } else {
+                retMessage += result.reason + "\n";
+            }
+        
+        });
+
+        if (resultAll.some(item => item.status === "fulfilled")) {
+            _ev.resolve(retMessage);
+            //this.reloadWordList();
+        } else {
+            _ev.reject(retMessage);
+        }
     }
 
     onDeleteTranslation = async (ev:Event) => {
+        const _ev:DeferredEvent<string> = (ev as DeferredEvent<string>);
+        //get inverseTranslation
+        const inverseTransResult = await this.host.dbCtr.getInverseTranslation(_ev.detail.to_word_id, _ev.detail.for_word_id);
+        
+        let deletePromises = [this.host.dbCtr.deleteTranslation(_ev.detail.translation_id)];
 
+        if(inverseTransResult.length > 0) {
+            deletePromises.push( this.host.dbCtr.deleteTranslation(inverseTransResult[0]));
+        }
+        
+        await Promise.all(deletePromises).then((results) => {
+            let message = "Translation ";
+            if(results.length > 1) message += "and it's inverse deleted";
+            else message += "deleted. No inverse translation found."
+            _ev.resolve(message);
+        }).catch((e) => _ev.reject(e));
+        // console.log(_ev.detail.translation_id);
+        // console.log(r1, r1[0]);
 
     }
     onAddLanguage = async(ev:Event) => {

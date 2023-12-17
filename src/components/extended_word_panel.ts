@@ -39,17 +39,28 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         .horizontal > * {
             flex: 1 1 50%;
         }
-        .definition-item {
+        .detail-item {
             display:flex;
             align-items: center;
             gap: var(--main-padding);
             justify-content: space-between;
             /* border: 1px solid black;*/
         }
-        .definition-list {
+
+        sl-details::part(content) {
+            display: flex;
+            justify-content: center;
+        }
+        .detail-list {
             display: flex;
             flex-direction: column;
             gap: var(--main-padding);
+            width: 61.4%;
+        }
+        @media (max-width: 900px) {
+            .detail-list {
+                width: 100%;
+            }
         }
 
         .def-text {
@@ -65,6 +76,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
             padding-left: var(--main-padding);
             padding-right: var(--main-padding);
         }
+        
       `
     ];
 
@@ -141,6 +153,19 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         this.dispatchEvent(deleteDefEvent);
     }
 
+    deleteTranslation(item:Translation) {
+        var deleteTransEvent = new DeferredEvent<string>(event_types.DELETE_TRANSLATION, item);
+        const p:Promise<string> = deleteTransEvent.promise;
+        p.then(() => {
+            //this.getTables('definition');
+            this.getWordDetails();
+        }).catch((e) => {
+            console.log(e);
+            
+        });
+
+        this.dispatchEvent(deleteTransEvent);
+    }
     editDefinition(ev:Event) {
         const item:SlTextarea = (ev.currentTarget as SlTextarea);
         item.toggleAttribute("readonly");
@@ -159,16 +184,19 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                     <sl-tab-panel name="show_details">
                         <div id="details-group">
                             <sl-details id="translation" summary="Translations (${this.translations.length})">
-                                <ul>
+                                <ul class="detail-list">
                                 ${this.translations.map((item:Translation) => html`
-                                    <li> ${item.to_word_id} - ${item.to_Word?.word} - ${item.to_Word?.language_title}</li>
+                                    <li class="detail-item"> 
+                                        <div>${item.to_word_id} - ${item.to_Word?.word} - ${item.to_Word?.language_title}</div>
+                                        <sl-button @click=${() => this.deleteTranslation(item)}>Delete</sl-button>
+                                    </li>
                                 `)}
                                 </ul>
                             </sl-details>
                             <sl-details id="definition" summary="Definitions (${this.definitions.length})">
-                                <ul class="definition-list">
+                                <ul class="detail-list">
                                 ${this.definitions.map((item:Definition, index:number) => html`
-                                    <li class="definition-item">
+                                    <li class="detail-item">
                                         <definition-area tabindex=${index} .definition=${item} @app-request-word-data=${ () => this.reloadData('definition')}></definition-area>
                                         <!-- <sl-textarea class="def-text" resize="auto" rows="1" readonly value=${item.definition} @click=${this.editDefinition}></sl-textarea>
                                         <sl-tooltip content="Delete">

@@ -45,7 +45,7 @@ export default css`
   }
 
   sl-drawer::part(panel) {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.7);
   }
   /* sl-button::part(base) {
     background-color: var(--sl-color-primary-600);

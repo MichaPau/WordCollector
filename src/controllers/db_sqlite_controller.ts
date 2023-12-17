@@ -51,7 +51,7 @@ export class DBSQLiteController implements ReactiveController{
         await this.begin();
         let commit:boolean = true;
 
-        await Promise.all(values.map(async (value, index) => {
+        await Promise.all(values.map(async (value) => {
             const checkQuery = "SELECT COUNT(*) as count FROM testTable WHERE value = $1";
             let check:Array<{count: number}> = await this.checkQuery(checkQuery, [value]);
             
@@ -159,7 +159,7 @@ export class DBSQLiteController implements ReactiveController{
     }
     async getWordFromId(id:number):Promise<Array<Word>> {
         let result = await this.db.select('SELECT *, l.title as language_title FROM word INNER JOIN language l ON l.lang_id = language WHERE word_id = $1', [id]);
-        console.log(result);
+        //console.log(result);
         return result as Array<Word>;
     }
     
@@ -289,6 +289,26 @@ export class DBSQLiteController implements ReactiveController{
             } catch(e) {
                 throw(e);
             }
+        }
+    }
+
+    async deleteTranslation(trans_id:number) {
+        const q = "DELETE FROM translation WHERE trans_id = $1";
+        try {
+            let result = await this.db.execute(q, [trans_id]);
+            return result;
+        } catch(e) {
+            throw(e);
+        }
+    }
+
+    async getInverseTranslation(for_word_id:number, to_word_id:number):Promise<Array<number>> {
+        const q = "SELECT translation_id FROM translation WHERE for_word_id = $1 AND to_word_id = $2";
+        try {
+            let result = await this.db.select(q, [for_word_id, to_word_id]);
+            return result as Array<number>;
+        } catch(e) {
+            throw(e);
         }
     }
 }

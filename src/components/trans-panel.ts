@@ -23,25 +23,66 @@ export class TranslationPanel extends LitElement {
       css`
         #lookup-container {
             display: flex;
-            justify-content: center;
+            justify-content: left;
             gap: var(--main-padding);
-            width: 100%;
+           
+            //width: 100%;
             //border: 1px solid black;
         }
 
+         
+        sl-details::part(content) {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* width: 61.4%; */
+            //gap: var(--main-padding);
+
+            
+        }
+        .details-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* width: 61.4%; */
+            gap: var(--main-padding);
+            width: 61.4%;
+            //border: 1px solid black;
+        }
+        @media (max-width: 900px) {
+            .details-container {
+                width: 100%;
+            }
+        }
         #lookup-result-container {
             display: flex;
             flex-direction: column;
             gap: var(--main-padding);
+           
             //border: 1px solid black;
         }
 
         #lookup-selected {
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            //width: 61.4%;
+            //justify-content: space-between;
+            gap: var(--main-padding);
+
+            & .word-info {
+                flex: 0 0 61.4%;
+                font-weight: var(--sl-font-weight-bold);
+            }
+            & .spacer {
+                flex-grow: 1;
+            }
+            & sl-button {
+                flex: 0 0 auto;
+            }
         }
         .search-input {
-            flex: 1 1 70%;
+            flex: 1 0 61.4%;
         }
 
         .hide-menu-border {
@@ -142,10 +183,16 @@ export class TranslationPanel extends LitElement {
         const ev:CustomEvent = (_ev as CustomEvent);
         this.resultInfo.innerHTML = "";
 
-        const addEvent:DeferredEvent<string> = new DeferredEvent<string>(event_types.ADD_WORD_AND_TRANSLATION, 
+        this.submitTranslation(ev.detail as Word, event_types.ADD_WORD_AND_TRANSLATION);
+        
+    }
+
+    submitTranslation(word:Word, type:string) {
+
+        const addEvent:DeferredEvent<string> = new DeferredEvent<string>(type, 
             {
                 for_word_id: this.word!.word_id,
-                word: ev.detail as Word
+                word: word
             }
         );
 
@@ -169,12 +216,20 @@ export class TranslationPanel extends LitElement {
     onWordCancel() {
         this.wordForm.reset();
     }
+    onAddSelectedTranslation() {
+        if(this.selectedWord) {
+            this.submitTranslation(this.selectedWord, event_types.ADD_TRANSLATION);
+        }
+    }
+
     render() {
         return html`
             <div id="details-group-container">
-                <sl-details summary="Look up word." open>
+                <sl-details id="lookup-pane" summary="Look up word." open>
+                    <div class="details-container">
                     <div id="lookup-container">
                         <sl-input id="search-input" class="search-input" label="Search word" clearable @sl-input=${this.onSearchInput}></sl-input>
+                        
                         <sl-select id="trans-lang" name="trans-lang" label="Language" required hoist @sl-change=${this.onSearchInput}>
                             ${this.lang_list.map((lang) => html`
                                 <sl-option value="${lang.lang_id!}">${lang.title}</sl-option>
@@ -185,40 +240,30 @@ export class TranslationPanel extends LitElement {
                     ${this.selectedWord ? 
                         html `
                             <div id="lookup-selected">
-                                <div>${this.selectedWord.word} - ${this.selectedWord.language_title} - ${this.selectedWord.type}</div>
-                                <sl-button>Add</sl-button>
+                                <div class="word-info">${this.selectedWord.word} - ${this.selectedWord.language_title} - ${this.selectedWord.type}</div>
+                                <div class="spacer"></div>
+                                <sl-button @click=${() => {
+                                    this.selectedWord = undefined;
+                                    this.lookupMenu!.replaceChildren();
+                                }}>Cancel</sl-button>
+                                <sl-button variant="primary" @click=${this.onAddSelectedTranslation}>Add</sl-button>
                             </div>
                         ` : nothing}
                 
-                <div id="lookup-result-container">
-                    <sl-menu class="hide-menu-border" id="lookup-menu" @sl-select=${this.onSearchSelect}></sl-menu>
+                    <div id="lookup-result-container">
+                        <sl-menu class="hide-menu-border" id="lookup-menu" @sl-select=${this.onSearchSelect}></sl-menu>
+                    </div>
                 </div>
                 </sl-details>
                 <sl-details summary="Create new word.">
-                    <!-- <form id="word-form" >
-                        <sl-input name="word-input" label="Word:" required spellcheck="false"></sl-input>
-                        <div class="horizontal">
-                            <sl-select name="word-lang" label="Language"  required hoist>
-                                ${this.lang_list.map((lang) => html`
-                                    <sl-option value="${lang.lang_id!}">${lang.title}</sl-option>
-                                `)}
-                            </sl-select>
-                            <sl-select name="word-type" label="Type"  required hoist>
-                                ${this.type_list.map((type) => html`
-                                    <sl-option value="${type.title!}">${type.title}</sl-option>
-                                `)}
-                            </sl-select>
-                        </div>
-                        <div class="button-bar">
-                            <sl-button type="submit" variant="primary" class="submit-button">Add Translation</sl-button>
-                        </div>
-                    </form> -->
+                    <div class="details-container">
                     <word-form id="word-form" .lang_list=${this.lang_list} .type_list=${this.type_list}
                         submitLabel="New Word" cancellable
                         @on-word-submit=${this.onWordSubmit} @on-word-cancel=${this.onWordCancel}
                     ></word-form>
-                    <div id="result-info"></div>
+                    </div>
                 </sl-details>
+                <div id="result-info"></div>
             </div>
         `;
     }
