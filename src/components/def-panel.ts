@@ -14,11 +14,25 @@ export class DefinitionPanel extends LitElement {
     static styles = [
       compStyles,  
       css`
+
+        :host {
+            width: 100%;
+        }
+        /* #definition-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        } */
         #definitions-form {
             display: flex;
             flex-direction: column;
             gap: var(--main-padding);
         }
+        sl-details::part(content) {
+            display: flex;
+            justify-content: center;
+        }
+        
       `
     ];
     
@@ -79,7 +93,9 @@ export class DefinitionPanel extends LitElement {
 
     render() {
         return html`
-            <h3>${this.title}</h3>
+        <sl-details summary="Add a definition" open>
+        <div id="definition-container" part="content-container">
+            <!-- <h3>${this.title}</h3> -->
             <form id="definitions-form">
                 
                     <!-- <sl-input label="Definition:" required></sl-input> -->
@@ -96,6 +112,8 @@ export class DefinitionPanel extends LitElement {
                     <div id="result-info"></div>
                 </div>
             </form>
+        </div>
+        </sl-details>
         `;
     }
 }

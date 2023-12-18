@@ -29,7 +29,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         #container {
             display: grid;
         }
-        .horizontal {
+        /* .horizontal {
             list-style: none;
             display: flex;
             flex-direction: row;
@@ -38,6 +38,18 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
 
         .horizontal > * {
             flex: 1 1 50%;
+        } */
+
+        .detail-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--main-padding);
+            width: var(--not-full-width);
+        }
+        @media (max-width: 900px) {
+            .detail-list {
+                width: 100%;
+            }
         }
         .detail-item {
             display:flex;
@@ -51,17 +63,11 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
             display: flex;
             justify-content: center;
         }
-        .detail-list {
+        .center-content::part(base) {
             display: flex;
-            flex-direction: column;
-            gap: var(--main-padding);
-            width: 61.4%;
+            justify-content: center;
         }
-        @media (max-width: 900px) {
-            .detail-list {
-                width: 100%;
-            }
-        }
+        
 
         .def-text {
             flex: 1 1 80%;
@@ -75,6 +81,22 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         sl-tab-panel {
             padding-left: var(--main-padding);
             padding-right: var(--main-padding);
+        }
+
+        translation-panel::part(content-container) {
+            width: var(--not-full-width);
+        }
+        definition-panel::part(content-container) {
+            width: var(--not-full-width);
+        }
+
+        @media (max-width: 900px) {
+            translation-panel::part(content-container) {
+                width: 100%;
+            }
+            definition-panel::part(content-container) {
+                width: 100%;
+            }
         }
         
       `
@@ -211,7 +233,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                     <sl-tab-panel name="add_translation">
                         <translation-panel .word=${this.word} .lang_list=${this.lang_list} .type_list=${this.type_list} @app-request-word-data=${ () => this.reloadData('translation')}></translation-panel>
                     </sl-tab-panel>
-                    <sl-tab-panel name="add_definition">
+                    <sl-tab-panel class="center-content" name="add_definition">
                         <definition-panel title="Add a definition" .lang_list=${this.lang_list} .word=${this.word} @app-request-word-data=${ () => this.reloadData('definition')}></definition-panel>
                     </sl-tab-panel>
                 </sl-tab-group>

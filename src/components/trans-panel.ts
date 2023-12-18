@@ -33,28 +33,16 @@ export class TranslationPanel extends LitElement {
          
         sl-details::part(content) {
             display: flex;
-            flex-direction: column;
             justify-content: center;
-            align-items: center;
-            /* width: 61.4%; */
-            //gap: var(--main-padding);
-
-            
         }
         .details-container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            /* width: 61.4%; */
             gap: var(--main-padding);
-            width: 61.4%;
-            //border: 1px solid black;
+
+            justify-content: center;
         }
-        @media (max-width: 900px) {
-            .details-container {
-                width: 100%;
-            }
-        }
+       
         #lookup-result-container {
             display: flex;
             flex-direction: column;
@@ -224,9 +212,9 @@ export class TranslationPanel extends LitElement {
 
     render() {
         return html`
-            <div id="details-group-container">
+            <div id="details-group-container"  >
                 <sl-details id="lookup-pane" summary="Look up word." open>
-                    <div class="details-container">
+                    <div class="details-container" part="content-container">
                     <div id="lookup-container">
                         <sl-input id="search-input" class="search-input" label="Search word" clearable @sl-input=${this.onSearchInput}></sl-input>
                         
@@ -256,7 +244,7 @@ export class TranslationPanel extends LitElement {
                 </div>
                 </sl-details>
                 <sl-details summary="Create new word.">
-                    <div class="details-container">
+                    <div class="details-container" part="content-container">
                     <word-form id="word-form" .lang_list=${this.lang_list} .type_list=${this.type_list}
                         submitLabel="New Word" cancellable
                         @on-word-submit=${this.onWordSubmit} @on-word-cancel=${this.onWordCancel}

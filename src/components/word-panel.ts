@@ -132,7 +132,7 @@ export class WordPanel extends LitElement implements DrawerItem {
     }
 
     onWordSubmit(_ev:Event) {
-        console.log('onTestWordSubmit');
+        console.log('onTestWordSubmit', _ev.currentTarget);
         const ev:CustomEvent = (_ev as CustomEvent);
         this.resultInfo.innerHTML = "";
 
@@ -150,9 +150,11 @@ export class WordPanel extends LitElement implements DrawerItem {
             
             this.resultInfo.className = "success";
             this.resultInfo.innerHTML = ev.detail.word + result_msg;
+            //this.wordForm.loadingState = false;
             setTimeout(() => {
                this.closeAction();
                if(this.mode === "Update") {
+                    this.wordForm.loadingState = false;
                     this.dispatchEvent(new Event(event_types.CLOSE_WORD_DIALOG, {bubbles:true, composed: true}));
                } else {
                     //form.reset();
@@ -161,8 +163,11 @@ export class WordPanel extends LitElement implements DrawerItem {
         })
         .catch((e) => { 
             console.log("Promise rejected:", e);
+            this.wordForm.loadingState = false;
             this.resultInfo.className = "error";
             this.resultInfo.innerHTML = "Error: "+e;
+        }).finally(() => {
+            //this.wordForm.loadingState = false;
         });
 
         const options:DBEventOptionsItem = {
@@ -192,29 +197,7 @@ export class WordPanel extends LitElement implements DrawerItem {
                 >
             </word-form>
             <div id="result-info"></div>
-            <!-- <form id="word-form" >
-                <label class="invisible">Add a new word:</label>
-                <sl-input id="word_id" name="id" label="ID:" class="short hidden" value=${this.word!.word_id!.toString()} readonly></sl-input>
-                <sl-input name="word-input" label="Word:" required spellcheck="false" value=${this.word!.word}></sl-input>
-                <div class="horizontal">
-                    <sl-select name="word-lang" label="Language" value=${this.word!.language} required hoist>
-                        ${this.lang_list.map((lang) => html`
-                            <sl-option value="${lang.lang_id!}">${lang.title}</sl-option>
-                        `)}
-                    </sl-select>
-                    <sl-select name="word-type" label="Type" value=${this.word!.type} required hoist>
-                        ${this.type_list.map((type) => html`
-                            <sl-option value="${type.title!}">${type.title}</sl-option>
-                        `)}
-                    </sl-select>
-                </div>
-               
-                <div class="button-bar">
-                    ${this.mode === "Update" ? html`<sl-button @click="${this.cancelUpdate}" variant="default">Cancel</sl-button>` : nothing}
-                    <sl-button type="submit" variant="primary" class="submit-button">${this.mode}</sl-button>
-                </div>
-                <div id="result-info"></div>
-            </form> -->
+            
         `;
     }
 }

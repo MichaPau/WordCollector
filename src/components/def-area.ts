@@ -1,4 +1,4 @@
-import { LitElement, html, css, nothing, PropertyValueMap } from 'lit';
+import { LitElement, html, css, PropertyValueMap } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import {classMap} from 'lit/directives/class-map.js';
 
@@ -29,6 +29,7 @@ export class DefinitionArea extends LitElement {
         }
         .def-text {
             flex: 1 1 80%;
+            /* height: 3em; */
         }
 
         /* #text-area:not(:read-only)::part(textarea):focus {
@@ -89,13 +90,12 @@ export class DefinitionArea extends LitElement {
         this.dispatchEvent(deleteDefEvent);
     }
 
-    enableEdit(ev:MouseEvent) {
+    enableEdit() {
         
         this.editState = true;
         this.textArea!.focus();
     }
-    undoEdit(ev:Event) {
-       // console.log(ev);
+    undoEdit() {
        
         this.editState = false;
         this.textArea!.value = this.definition!.definition;
@@ -145,7 +145,7 @@ export class DefinitionArea extends LitElement {
             <div id="area-container">
             
             <sl-textarea 
-                id="text-area" class="def-text" resize="auto" rows="1" 
+                id="text-area" class="def-text" resize="auto" rows="1" size="small"
                 value=${this.definition!.definition}
                 class="def-text ${classMap(classes)}"
                 .readonly="${!this.editState}"

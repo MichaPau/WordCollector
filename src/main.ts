@@ -32,6 +32,7 @@ import compStyles from './styles/default-component.styles.js';
 import { OPEN_WORD_DRAWER, OPEN_LANGUAGE_DRAWER } from './controllers/event_controller.js';
 
 import './components/lang-panel.js';
+import './components/testDialog.js';
 import './pages/words.js';
 import './components/action-bar.js';
 

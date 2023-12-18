@@ -112,6 +112,9 @@ export class AppEventController implements ReactiveController {
         this.host.removeEventListener(DELETE_LANGUAGE, this.onDeleteLanguage);
     }
 
+    timeout(ms:number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     onTestEvent = async (e:Event) => {
         
         const _ev:DeferredEvent<number> = e as DeferredEvent<number>;
@@ -365,8 +368,9 @@ export class AppEventController implements ReactiveController {
     async wordActionWithPromise(f:Function, ev:Event) {
         
         var w:Word = (ev as CustomEvent).detail.item;
-        await f.call(this.host.dbCtr, w).then((result:QueryResult) => {
+        await f.call(this.host.dbCtr, w).then(async (result:QueryResult) => {
             let resolve =  (ev as CustomEvent).detail.resolve;
+            await this.timeout(2000);
             resolve(result);
             (async () => {
                 //this.host.word_list = await this.host.dbCtr.selectAllWords();

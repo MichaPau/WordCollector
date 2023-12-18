@@ -18,6 +18,9 @@
   --main-padding: 0.5em;
   --error-color: red;
   --success-color: green;
+
+  --not-full-width: 61.4%;
+  
   /* --sl-focus-ring-width: 1px;
   --sl-focus-ring: 0 0 0 var(--sl-focus-ring-width) #1d69b9; */
 }
