@@ -1,1 +1,1 @@
-export const CLOSE_TIMEOUT_MS = 2500;
+export const CLOSE_TIMEOUT_MS = 1500;

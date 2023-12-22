@@ -172,9 +172,9 @@ export class DBSQLiteController implements ReactiveController{
         if(check[0].count > 0) {
             throw new Error("Exact duplicate is already in the database.");
         } else {
-            const q = "INSERT INTO word (word, language, type) VALUES ($1, $2, $3)";
+            const q = "INSERT INTO word (word, language, type, forms) VALUES ($1, $2, $3, $4)";
             try {
-                let result = await this.db.execute(q, [word.word, word.language, word.type]);
+                let result = await this.db.execute(q, [word.word, word.language, word.type, word.forms]);
                 return result;
             } catch(e) {
                 throw(e);
@@ -211,10 +211,10 @@ export class DBSQLiteController implements ReactiveController{
         }
     }
     async updateWord(item:Word) {
-        const q = "UPDATE word SET word = $1, language = $2, type = $3 WHERE word_id = $4";
+        const q = "UPDATE word SET word = $1, language = $2, type = $3, forms =  $4 WHERE word_id = $5";
 
         try {
-            let result = await this.db.execute(q, [item.word, item.language, item.type, item.word_id]);
+            let result = await this.db.execute(q, [item.word, item.language, item.type, item.forms,  item.word_id]);
             console.log("Update word result:", result);
             return result;
         } catch (e) {

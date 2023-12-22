@@ -17,6 +17,7 @@ import { Definition, DrawerItem, Language, Translation, Type, Word} from '../app
 import './trans-panel.js';
 import './def-panel.js';
 import './def-area.js';
+import './word-forms-helper.js';
 //import { AppRequestWordDataEvent } from '../events/app-request-word-data.js';
 import { DeferredEvent } from '../events/app-events.js';
 
@@ -205,6 +206,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                     <sl-tab slot="nav" panel="add_definition">Add Definition</sl-tab>
                     <sl-tab-panel name="show_details">
                         <div id="details-group">
+                            <word-form-helper forms-string=${this.word.forms!}></word-form-helper>
                             <sl-details id="translation" summary="Translations (${this.translations.length})">
                                 <ul class="detail-list">
                                 ${this.translations.map((item:Translation) => html`

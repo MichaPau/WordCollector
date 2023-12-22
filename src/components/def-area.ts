@@ -2,7 +2,7 @@ import { LitElement, html, css, PropertyValueMap } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import {classMap} from 'lit/directives/class-map.js';
 
-import { SlTextarea } from '@shoelace-style/shoelace';
+import { SlAlert, SlTextarea } from '@shoelace-style/shoelace';
 
 import {DELETE_DEFINITION,  UPDATE_DEFINITION} from '../controllers/event_controller.js';
 
@@ -10,6 +10,7 @@ import compStyles from '../styles/default-component.styles.js';
 import { Definition } from '../app-types.js';
 import { DeferredEvent } from '../events/app-events.js';
 
+import './testDialog.js'
 @customElement('definition-area')
 export class DefinitionArea extends LitElement {
 
@@ -18,6 +19,7 @@ export class DefinitionArea extends LitElement {
       css`
         :host {
             width: 100%;
+            position: relative;
         }
         #area-container {
             display: flex;
@@ -25,6 +27,8 @@ export class DefinitionArea extends LitElement {
             gap: var(--main-padding);
             justify-content: space-between;
             width: 100%;
+
+            position: relative;
 
         }
         .def-text {
@@ -52,6 +56,20 @@ export class DefinitionArea extends LitElement {
             box-shadow: 0 0 0 2px #b6b91d;
             border-radius: var(--sl-input-border-radius-medium);
        }
+
+       #confirm-delete-alert::part(base) {
+            position: absolute;
+            z-index: var(--sl-z-index-toast);
+            width: 30%;
+            min-width: 200px;
+            top: 50%;
+            right:0;
+            transform: translate(0, -50%);
+            /* max-height: 100%; */
+       }
+       sl-alert::part(message) {
+        padding: var(--sl-spacing-x-small);
+       }
        
       `
     ];
@@ -65,6 +83,9 @@ export class DefinitionArea extends LitElement {
 
     @query("#text-area")
     textArea?:SlTextarea;
+
+    @query("#confirm-delete-alert")
+    confirmDeleteAlert!:SlAlert;
 
     constructor() {
         super();
@@ -126,10 +147,10 @@ export class DefinitionArea extends LitElement {
     }
 
     onFocusOut = (ev:FocusEvent) => {
-        console.log("onFocusOut defarea:");
-        console.log(ev.target);
-        console.log(ev.currentTarget);
-        console.log(ev.relatedTarget);
+        // console.log("onFocusOut defarea:");
+        // console.log(ev.target);
+        // console.log(ev.currentTarget);
+        // console.log(ev.relatedTarget);
         this.editState = false;
     }
     // editDefinition(ev:Event) {
@@ -175,10 +196,29 @@ export class DefinitionArea extends LitElement {
             <sl-tooltip content="Save edit">
                 <sl-icon-button name="database-add" label="Save edit" .disabled=${!this.editState} @mousedown=${(ev:Event) => ev.preventDefault()} @click=${this.saveEdit}></sl-icon-button>
             </sl-tooltip>
-            
-            <sl-tooltip content="Delete">
-                <sl-icon-button name="trash" label="Delete" .disabled=${this.editState} @mousedown=${(ev:Event) => ev.preventDefault()} @click=${ () => this.deleteDefinition(this.definition!)}></sl-icon-button>
+            <sl-tooltip content="Test">
+                <sl-icon-button name="life-preserver" label="Test" @mousedown=${(ev:Event) => ev.preventDefault()} 
+                    @click=${(ev:Event) => {
+                        
+                        this.confirmDeleteAlert.show();
+                    }}></sl-icon-button>
+                
             </sl-tooltip>
+            <sl-tooltip content="Delete">
+                <sl-icon-button name="trash" label="Delete" .disabled=${this.editState} @mousedown=${(ev:Event) => ev.preventDefault()} @click=${ () => this.confirmDeleteAlert.show()}></sl-icon-button>
+            </sl-tooltip>
+            <!-- <div id="confirm-delete-alert" variant="warning" closable>
+                    Confirm delete ${this.definition!.definition_id}
+                    <div class="horizontal"><sl-button>Cancel</sl-button><sl-button>Delete</sl-button></div>
+            </div> -->
+            <sl-alert id="confirm-delete-alert" variant="warning" closable>
+                    Confirm delete ${this.definition!.definition_id}
+                    <div class="horizontal"><sl-button size="small" @click=${() => this.confirmDeleteAlert.hide()}>Cancel</sl-button><sl-button size="small" @click=${ () => this.deleteDefinition(this.definition!)}>Delete</sl-button></div>
+            </sl-alert>
+            <!-- <sl-card id="confirm-delete-alert" class="card-basic">
+                This is just a basic card. No image, no header, and no footer. Just your content.
+            </sl-card> -->
+            <!-- <test-dialog id="confirm-delete-alert"></test-dialog> -->
             <!-- ${
                 this.editState ?
                 html `
@@ -199,7 +239,9 @@ export class DefinitionArea extends LitElement {
                 ` 
             } -->
         
-        </div>    
+        </div>
+        
+        
         `;
     }
 }

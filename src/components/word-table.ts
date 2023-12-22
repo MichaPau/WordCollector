@@ -5,11 +5,6 @@ import { DBEventOptionsItem, DrawerItem, Language, SortableColumn, Type, Word, d
 
 import compStyles from '../styles/default-component.styles.js';
 
-import '@shoelace-style/shoelace/dist/components/icon/icon.js';
-import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
-import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
-
 import { getBasePath, setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { SlDialog, SlDrawer } from '@shoelace-style/shoelace';
 
@@ -234,6 +229,9 @@ export class WordTable extends LitElement {
     updateWord(_word:Word) {
         //this.wordDlg!.word = _word;
 
+        if(this.drawer.hasChildNodes()) {
+            this.drawer.replaceChildren();
+        }
         let dlg = new WordPanel();
         dlg.word = _word;
         dlg.lang_list = this.lang_list;
@@ -247,6 +245,11 @@ export class WordTable extends LitElement {
         this.drawer.show();
     }
     openDetails(_word:Word) {
+
+        if(this.drawer.hasChildNodes()) {
+            this.drawer.replaceChildren();
+        }
+
         let dlg = new ExtendWordPanel();
         dlg.word = _word;
         dlg.lang_list = this.lang_list;
@@ -310,7 +313,9 @@ export class WordTable extends LitElement {
                             <td class="word_td" @click=${() => this.openDetails(word)}>${word.word}</td>
                             <td>${word.language_title}</td>
                             <td>${word.type}</td>
-                            <td>${word.created_at}</td>
+                            <td>
+                                <sl-format-date day="numeric" month="short" year="numeric" hour="numeric" minute="numeric" hour-format="24" date=${word.created_at!}></sl-format-date>
+                            </td>
                             <td class="min-column">
                                 <div class="action-column">
                                     <sl-tooltip content="Update ${word.word}">

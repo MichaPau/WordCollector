@@ -370,7 +370,7 @@ export class AppEventController implements ReactiveController {
         var w:Word = (ev as CustomEvent).detail.item;
         await f.call(this.host.dbCtr, w).then(async (result:QueryResult) => {
             let resolve =  (ev as CustomEvent).detail.resolve;
-            await this.timeout(2000);
+            // await this.timeout(2000);
             resolve(result);
             (async () => {
                 //this.host.word_list = await this.host.dbCtr.selectAllWords();

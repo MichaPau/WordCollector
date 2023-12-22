@@ -89,6 +89,21 @@ export class AppSettingsController implements ReactiveController{
             ],
             options: {duration: 250, easing: 'ease'}
         });
+        setDefaultAnimation('alert.show', {
+            keyframes: [
+              { opacity: 0, scale: 0.1 },
+              { opacity: 1, scale: 1 }
+            ],
+            options: { duration: 150, easing: 'ease' }
+        });
+        
+        setDefaultAnimation('alert.hide', {
+            keyframes: [
+                { opacity: 1, scale: 1 },
+                { opacity: 0, scale: 0.1 }
+            ],
+            options: { duration: 150, easing: 'ease' }
+        });
     }
     hostDisconnected(): void {
         if(this.appCloseRequest)

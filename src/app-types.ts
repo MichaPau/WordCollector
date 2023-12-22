@@ -28,6 +28,7 @@ export interface Word {
     type: string,
     
     language_title?: string,
+    forms?: string,
     created_at?: Date,
     last_used?: Date,
     created_timestamp?: number,

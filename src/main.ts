@@ -10,26 +10,30 @@ import { AppSettingsController } from './controllers/app_settings_controller.js'
 
 import { Language, Table, Word, Type, DrawerItem } from './app-types.js';
 
+import compStyles from './styles/default-component.styles.js';
+import { OPEN_WORD_DRAWER, OPEN_LANGUAGE_DRAWER } from './controllers/event_controller.js';
+
 import { SlAlert, SlDrawer } from '@shoelace-style/shoelace';
 
 
-import '@shoelace-style/shoelace/dist/components/input/input.js';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
-import '@shoelace-style/shoelace/dist/components/select/select.js';
-import '@shoelace-style/shoelace/dist/components/option/option.js';
-
-import '@shoelace-style/shoelace/dist/components/details/details.js';
-import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js';
-import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
-import '@shoelace-style/shoelace/dist/components/tab/tab.js';
-import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
-import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/details/details.js';
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
+import '@shoelace-style/shoelace/dist/components/format-date/format-date.js';
+import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/menu/menu.js';
 import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
-
-import compStyles from './styles/default-component.styles.js';
-import { OPEN_WORD_DRAWER, OPEN_LANGUAGE_DRAWER } from './controllers/event_controller.js';
+import '@shoelace-style/shoelace/dist/components/option/option.js';
+import '@shoelace-style/shoelace/dist/components/select/select.js';
+import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js';
+import '@shoelace-style/shoelace/dist/components/tab/tab.js';
+import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
+import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
+import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 
 import './components/lang-panel.js';
 import './components/testDialog.js';

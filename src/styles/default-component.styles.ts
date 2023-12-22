@@ -11,7 +11,7 @@ export default css`
     padding: 0;
     box-sizing: border-box;
     --sl-focus-ring-width: 1px;
-    --sl-focus-ring: 0 0 0 var(--sl-focus-ring-width) #1d69b9;
+    --sl-focus-ring: 0 0 0 var(--sl-focus-ring-width) var(--sl-focus-ring-color);
   }
 
   :host *,
@@ -43,9 +43,18 @@ export default css`
     visibility: hidden;
     height: 0;
   }
+  .horizontal {
+    display: flex;
+    gap: var(--main-padding);
+  }
 
   sl-drawer::part(panel) {
     background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  sl-button:focus-within::part(base) {
+      outline: var(--sl-focus-ring-style) var(--sl-focus-ring-width) var(--sl-focus-ring-color);
+      outline-offset: var(--sl-focus-ring-offset);
   }
   /* sl-button::part(base) {
     background-color: var(--sl-color-primary-600);
