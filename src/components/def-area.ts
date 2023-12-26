@@ -1,8 +1,8 @@
-import { LitElement, html, css, PropertyValueMap } from 'lit';
+import { LitElement, html, css} from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import {classMap} from 'lit/directives/class-map.js';
 
-import { SlAlert, SlTextarea } from '@shoelace-style/shoelace';
+import {SlButton, SlTextarea } from '@shoelace-style/shoelace';
 
 import {DELETE_DEFINITION,  UPDATE_DEFINITION} from '../controllers/event_controller.js';
 
@@ -10,7 +10,9 @@ import compStyles from '../styles/default-component.styles.js';
 import { Definition } from '../app-types.js';
 import { DeferredEvent } from '../events/app-events.js';
 
-import './testDialog.js'
+import './mini-alert-confirm.js';
+import { MiniAlertConfirm } from './mini-alert-confirm.js';
+
 @customElement('definition-area')
 export class DefinitionArea extends LitElement {
 
@@ -57,20 +59,44 @@ export class DefinitionArea extends LitElement {
             border-radius: var(--sl-input-border-radius-medium);
        }
 
-       #confirm-delete-alert::part(base) {
+       /* #confirm-delete-alert::part(base) {
             position: absolute;
             z-index: var(--sl-z-index-toast);
             width: 30%;
-            min-width: 200px;
+            min-width: 280px;
             top: 50%;
             right:0;
             transform: translate(0, -50%);
-            /* max-height: 100%; */
-       }
+       } */
        sl-alert::part(message) {
         padding: var(--sl-spacing-x-small);
        }
        
+       .default-padding {
+        padding: var(--main-padding);
+       }
+
+       .dialog-wrapper {
+        position: absolute;
+        z-index: var(--sl-z-index-toast);
+        min-width: 280px;
+        width: 30%;
+        right:0;
+        
+       }
+       .confirmDeleteStyle:modal {
+        background-color: rgba(255, 255, 255, 0.0);
+        width: 30%;
+        min-width: 280px;
+        transform: translate(0, -50%);
+        border: none;
+
+       
+       }
+
+       .confirm-styles {
+        color: var(--sl-color-warning-600);
+       }
       `
     ];
     
@@ -84,21 +110,25 @@ export class DefinitionArea extends LitElement {
     @query("#text-area")
     textArea?:SlTextarea;
 
+    @query("#confirm-alert")
+    confirmAlert!:MiniAlertConfirm;
+
     @query("#confirm-delete-alert")
-    confirmDeleteAlert!:SlAlert;
+    confirmDeleteAlert!:HTMLDialogElement;
+
+    @query("#delete-cancel-button")
+    deleteCancelButton!:SlButton;
 
     constructor() {
         super();
         //this.tabIndex = 0;
-        this.contentEditable = 'true';
+        //this.contentEditable = 'true';
     }
     connectedCallback(): void {
         super.connectedCallback();
         this.addEventListener("focusout", this.onFocusOut);
     }
-    protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-       
-    }
+    
     deleteDefinition(item:Definition) {
         var deleteDefEvent = new DeferredEvent<string>(DELETE_DEFINITION, item);
         const p:Promise<string> = deleteDefEvent.promise;
@@ -146,19 +176,15 @@ export class DefinitionArea extends LitElement {
         this.dispatchEvent(saveDefEvent);
     }
 
+    confirmDelete() {
+        this.confirmAlert.show();
+       
+    }
     onFocusOut = (ev:FocusEvent) => {
-        // console.log("onFocusOut defarea:");
-        // console.log(ev.target);
-        // console.log(ev.currentTarget);
-        // console.log(ev.relatedTarget);
+        
         this.editState = false;
     }
-    // editDefinition(ev:Event) {
-    //     const item:SlTextarea = (ev.currentTarget as SlTextarea);
-    //     item.toggleAttribute("readonly");
-    // }
-    //@sl-blur=${this.undoEdit}
-    //.readonly="${!this.editState}"
+   
     render() {
         const classes = {"focus-readonly": !this.editState, "focus-enabled": this.editState};
         return html`
@@ -183,65 +209,43 @@ export class DefinitionArea extends LitElement {
             >
             </sl-textarea>
             ${this.editState ? html `
-                <sl-tooltip content="Undo edit">
+                <sl-tooltip content="Undo edit" hoist>
                     <sl-icon-button name="x-square" label="Undo edit" @mousedown=${(ev:Event) => ev.preventDefault()} @click=${this.undoEdit}></sl-icon-button>
                 </sl-tooltip>
             
             ` : html `
-                <sl-tooltip content="Edit">
+                <sl-tooltip content="Edit" hoist>
                     <sl-icon-button name="vector-pen" label="Edit" @mousedown=${(ev:Event) => ev.preventDefault()} @click=${this.enableEdit}></sl-icon-button>
                 </sl-tooltip>
             `}
            
-            <sl-tooltip content="Save edit">
+            <sl-tooltip content="Save edit" hoist>
                 <sl-icon-button name="database-add" label="Save edit" .disabled=${!this.editState} @mousedown=${(ev:Event) => ev.preventDefault()} @click=${this.saveEdit}></sl-icon-button>
             </sl-tooltip>
-            <sl-tooltip content="Test">
+            <sl-tooltip content="Test" hoist>
                 <sl-icon-button name="life-preserver" label="Test" @mousedown=${(ev:Event) => ev.preventDefault()} 
-                    @click=${(ev:Event) => {
-                        
-                        this.confirmDeleteAlert.show();
-                    }}></sl-icon-button>
+                    @click=${this.confirmDelete}></sl-icon-button>
                 
             </sl-tooltip>
-            <sl-tooltip content="Delete">
-                <sl-icon-button name="trash" label="Delete" .disabled=${this.editState} @mousedown=${(ev:Event) => ev.preventDefault()} @click=${ () => this.confirmDeleteAlert.show()}></sl-icon-button>
+            <sl-tooltip content="Delete" hoist>
+                <sl-icon-button name="trash" label="Delete" .disabled=${this.editState} @mousedown=${(ev:Event) => ev.preventDefault()} 
+                @click=${this.confirmDelete}></sl-icon-button>
             </sl-tooltip>
-            <!-- <div id="confirm-delete-alert" variant="warning" closable>
-                    Confirm delete ${this.definition!.definition_id}
-                    <div class="horizontal"><sl-button>Cancel</sl-button><sl-button>Delete</sl-button></div>
+        
+            <mini-alert-confirm id="confirm-alert" 
+                @on-confirm-cancel=${() => console.log("confirm-canel:", this.definition)} 
+                @on-confirm-ok=${()=>console.log("confirm-ok", this.deleteDefinition(this.definition!))}>
+            </mini-alert-confirm>
+            <!-- <div class="dialog-wrapper" id="dialog-wrapper">
+            <dialog id="confirm-delete-alert" class="confirmDeleteStyle">
+                <sl-alert variant="warning" open>
+                    <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
+                    Confirm delete this definition.
+                    <div class="horizontal default-padding"><sl-button autofocus id="delete-cancel-button" size="small" @click=${() => this.confirmDeleteAlert.close()}>Cancel</sl-button><sl-button size="small" @click=${ () => this.deleteDefinition(this.definition!)}>Delete</sl-button></div>
+                </sl-alert>
+            </dialog>
             </div> -->
-            <sl-alert id="confirm-delete-alert" variant="warning" closable>
-                    Confirm delete ${this.definition!.definition_id}
-                    <div class="horizontal"><sl-button size="small" @click=${() => this.confirmDeleteAlert.hide()}>Cancel</sl-button><sl-button size="small" @click=${ () => this.deleteDefinition(this.definition!)}>Delete</sl-button></div>
-            </sl-alert>
-            <!-- <sl-card id="confirm-delete-alert" class="card-basic">
-                This is just a basic card. No image, no header, and no footer. Just your content.
-            </sl-card> -->
-            <!-- <test-dialog id="confirm-delete-alert"></test-dialog> -->
-            <!-- ${
-                this.editState ?
-                html `
-                    <sl-tooltip content="Save edit">
-                        <sl-icon-button name="database-add" label="Save edit" @click=${this.saveEdit}></sl-icon-button>
-                    </sl-tooltip>
-                    <sl-tooltip content="Undo edit">
-                        <sl-icon-button name="x-square" label="Undo edit" @click=${this.undoEdit}></sl-icon-button>
-                    </sl-tooltip>
-                ` :
-                html `
-                    <sl-tooltip content="Edit">
-                        <sl-icon-button name="vector-pen" label="Edit" @click=${ () => this.editState = true}></sl-icon-button>
-                    </sl-tooltip>
-                    <sl-tooltip content="Delete">
-                        <sl-icon-button name="trash" label="Delete" @click=${ () => this.deleteDefinition(this.definition!)}></sl-icon-button>
-                    </sl-tooltip>
-                ` 
-            } -->
-        
         </div>
-        
-        
         `;
     }
 }

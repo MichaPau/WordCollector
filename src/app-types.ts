@@ -11,6 +11,7 @@ export interface Language {
     token: string,
     title: string,
     title_native?:string,
+    icon?: string;
 }
 export interface Type {
   type_id?:number,

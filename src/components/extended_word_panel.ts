@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, PropertyValueMap } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import '@shoelace-style/shoelace/dist/components/details/details.js';
@@ -11,6 +11,7 @@ import { SlTabGroup, SlTextarea, SlDetails } from '@shoelace-style/shoelace';
 
 import compStyles from '../styles/default-component.styles.js';
 import * as event_types from '../controllers/event_controller.js';
+import { flags } from './flags/flag-library.js';
 import { Definition, DrawerItem, Language, Translation, Type, Word} from '../app-types.js';
 // import  *  as appTypes from '../app-types.js';
 
@@ -60,6 +61,21 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
             /* border: 1px solid black;*/
         }
 
+        .translation-text {
+            width: 100%;
+            /* &::part(input) {
+                background-color: var(--sl-input-background-color);
+                border-color: var(--sl-input-border-color);
+                opacity: 1.0;
+                color: var(--sl-input-color);
+                cursor: pointer;
+            } */
+           
+        }
+
+        .border {
+            border: 1px solid black;
+        }
         sl-details::part(content) {
             display: flex;
             justify-content: center;
@@ -73,17 +89,23 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         .def-text {
             flex: 1 1 80%;
         }
-        .textarea-span {
+        /* .textarea-span {
             flex: 1 1 80%;
             border: 1px solid #000;
             padding: 5px;
 
-        }
+        } */
         sl-tab-panel {
             padding-left: var(--main-padding);
             padding-right: var(--main-padding);
         }
 
+        /* sl-details::part(content) {
+            overflow: visible
+        }
+        .details__body {
+                overflow: visible;
+        } */
         translation-panel::part(content-container) {
             width: var(--not-full-width);
         }
@@ -129,11 +151,18 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         super.connectedCallback();
     
         this.getWordDetails();
+
+        
     //    this.getTables("translation");
     //    this.getTables("definition");
     }
 
-    
+    protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+        // const detail = this.shadowRoot!.querySelector("#definition")!.shadowRoot!.firstChild;
+        
+        // console.log("Extended_panel::detail",detail);
+    }
+
     getWordDetails() {
         const getDataEvent:DeferredEvent<Word> = new DeferredEvent(event_types.GET_WORD_DETAILS, this.word.word_id);
         const p:Promise<Word> = getDataEvent.promise;
@@ -193,6 +222,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         const item:SlTextarea = (ev.currentTarget as SlTextarea);
         item.toggleAttribute("readonly");
     }
+    
     async closeAction():Promise<void> {
         return undefined;
     }
@@ -209,12 +239,28 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                             <word-form-helper forms-string=${this.word.forms!}></word-form-helper>
                             <sl-details id="translation" summary="Translations (${this.translations.length})">
                                 <ul class="detail-list">
-                                ${this.translations.map((item:Translation) => html`
-                                    <li class="detail-item"> 
-                                        <div>${item.to_word_id} - ${item.to_Word?.word} - ${item.to_Word?.language_title}</div>
-                                        <sl-button @click=${() => this.deleteTranslation(item)}>Delete</sl-button>
+                                ${this.translations.map((item:Translation) => {
+                                    const langItem = this.lang_list.find(lang => lang.lang_id === item.to_Word!.language);
+                                    let iconEncoded;
+                                    if(langItem)
+                                        iconEncoded = encodeURIComponent(langItem.icon!);
+                                    else
+                                        iconEncoded = encodeURIComponent(flags.defaultTrimmed);
+                                    
+                                    return html`
+                                    <li class="detail-item">
+                                        <sl-input class="translation-text" value="${item.to_word_id} - ${item.to_Word?.word} - ${item.to_Word?.language_title}" readonly>
+                                            <img slot="prefix" class="lang-icon" src='data:image/svg+xml;charset=UTF-8,${iconEncoded!}'>
+                                        </sl-input>
+                                        <!-- <div>${item.to_word_id} - ${item.to_Word?.word} - ${item.to_Word?.language_title}</div> -->
+                                        <sl-tooltip content="Delete" hoist>
+                                            <sl-icon-button name="trash" label="Delete" 
+                                            @click=${() => this.deleteTranslation(item)}></sl-icon-button>
+                                        </sl-tooltip>
+                                        
+                                        <!-- <sl-button @click=${() => this.deleteTranslation(item)}>Delete</sl-button> -->
                                     </li>
-                                `)}
+                                `})}
                                 </ul>
                             </sl-details>
                             <sl-details id="definition" summary="Definitions (${this.definitions.length})">

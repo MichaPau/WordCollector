@@ -6,8 +6,8 @@ import compStyles from '../styles/default-component.styles.js';
 import { Language, Type, Word } from '../app-types.js';
 
 //import {getTabbableElements} from '@shoelace-style/shoelace/dist/internal/tabbable.js';
-import { getFormControls } from '@shoelace-style/shoelace/dist/utilities/form.js'
-import { getTabbableElements } from '../utils/tabbable.js';
+// import { getFormControls } from '@shoelace-style/shoelace/dist/utilities/form.js'
+// import { getTabbableElements } from '../utils/tabbable.js';
 
 @customElement('word-form')
 export class WordForm extends LitElement {
@@ -184,7 +184,6 @@ export class WordForm extends LitElement {
         }
         return html`
             <form id="word-form" class=${classMap(classes)}>
-            <input type="text"/>
                 <label class="invisible">Add a new word:</label>
                 <sl-input id="word_id" name="id" label="ID:" class="hidden" value=${this.word.word_id!.toString()} readonly></sl-input>
                 <sl-input name="word-input" label="Word:" required spellcheck="false" value=${this.word!.word}></sl-input>

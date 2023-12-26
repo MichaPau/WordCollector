@@ -236,9 +236,9 @@ export class DBSQLiteController implements ReactiveController{
     
     async addLanguage(item:Language) {
        
-        const q = "INSERT INTO language (token, title, title_native) VALUES ($1, $2, $3)";
+        const q = "INSERT INTO language (token, title, title_native, icon) VALUES ($1, $2, $3, $4)";
         try {
-            let result = await this.db.execute(q, [item.token, item.title, item.title_native]);
+            let result = await this.db.execute(q, [item.token, item.title, item.title_native, item.icon]);
             return result;
         } catch(e) {
             throw(e);
@@ -263,10 +263,10 @@ export class DBSQLiteController implements ReactiveController{
     }
 
     async updateLanguage(item:Language) {
-        const q = "UPDATE language SET token = $1,  title = $2, title_native = $3 WHERE lang_id = $4";
+        const q = "UPDATE language SET token = $1,  title = $2, title_native = $3, icon = $4 WHERE lang_id = $5";
 
         try {
-            let result = await this.db.execute(q, [item.token, item.title, item.title_native, item.lang_id]);
+            let result = await this.db.execute(q, [item.token, item.title, item.title_native, item.icon, item.lang_id]);
             console.log(result);
             return result;
         } catch (e) {

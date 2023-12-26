@@ -7,6 +7,8 @@ declare global {
       'app-request-word-data': CustomEvent;
       'on-word-submit': CustomEvent,
       'on-word-cancel': CustomEvent,
+      'on-confirm-ok': Event,
+      'on-confirm-cancel': Event,
     }
   }
   

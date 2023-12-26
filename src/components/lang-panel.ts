@@ -9,6 +9,7 @@ import compStyles from '../styles/default-component.styles.js';
 
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
 import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.component.js';
+import { SlTextarea } from '@shoelace-style/shoelace';
 
 @customElement('lang-panel')
 export class LanguagePanel extends LitElement implements DrawerItem{
@@ -30,6 +31,9 @@ export class LanguagePanel extends LitElement implements DrawerItem{
 
     @query("#lang_title")
     lang_title?:SlInput;
+
+    @query("#lang_icon")
+    lang_icon?:SlTextarea;
 
     @query("#lang_title_native")
     lang_title_native?:SlInput;
@@ -69,17 +73,21 @@ export class LanguagePanel extends LitElement implements DrawerItem{
         /* width: 5em; */
         align-items: center;
         gap: 0.25em;
-        padding: 0.25em;
+        gap: var(--main-padding) / 2.0;
+        /* padding: 0.25em; */
 
         &:hover {
             box-shadow: 0px 0px 2px 2px #b5abab;
         }
+       
     }
     .token-style {
         width: 2em;
         text-align: center;
         cursor: default;
     }
+
+    
     .submit-button {
             margin-top: 1rem;
             margin-bottom: 1em;
@@ -134,6 +142,7 @@ export class LanguagePanel extends LitElement implements DrawerItem{
             lang.lang_id = parseInt(formObj.id as string); 
         }
         
+        if(formObj.icon !== "") lang.icon = formObj.icon as string;
         // console.log("form_id:", formObj.id as string)
         // console.log("lang_id:", lang.lang_id);
 
@@ -243,16 +252,23 @@ export class LanguagePanel extends LitElement implements DrawerItem{
         this.lang_token!.value = "";
         this.lang_title!.value = "";
         this.lang_title_native!.value = "";
+        this.lang_icon!.value = "";
     }
     selectUpdateLang(lang: Language) {
         this.mode = "Update";
         this.lang_id!.value = lang.lang_id!.toString();
         this.lang_token!.value = lang.token;
         this.lang_title!.value = lang.title;
+        
         if(lang.title_native)
             this.lang_title_native!.value = lang.title_native;
         else
             this.lang_title_native!.value = "";
+
+        if(lang.icon)
+            this.lang_icon!.value = lang.icon;
+        else
+            this.lang_icon!.value = "";
     }
     render() {
         return html`
@@ -268,9 +284,12 @@ export class LanguagePanel extends LitElement implements DrawerItem{
                 <div id="delete-result"></div>
             </sl-dialog> 
             <ul class="token-list">
-                ${this.lang_list.map((lang) => html`
+                ${this.lang_list.map((lang) => {
+                    const iconEncoded = encodeURIComponent(lang.icon!);
+                    return html`
                     <li>
                         <div class="token-container">
+                            <img class="lang-icon" src='data:image/svg+xml;charset=UTF-8,${iconEncoded!}'>
                             <sl-tooltip content="${lang.token} - ${lang.title}">
                                 <div class="token-style">${lang.token}</div>
                             </sl-tooltip>
@@ -280,10 +299,9 @@ export class LanguagePanel extends LitElement implements DrawerItem{
                             <sl-tooltip content="Delete ${lang.title}">
                                 <sl-icon-button name="trash" label="Delete ${lang.title}" @click=${ () => this.confirmDeleteLang(lang)}></sl-icon-button>
                             </sl-tooltip>
-                            
                         </div>
                     </li>
-                `)}
+                `})}
             </ul>
             <form id="lang-form" >
                 <label class="invisible">Add a new language</label>
@@ -296,6 +314,8 @@ export class LanguagePanel extends LitElement implements DrawerItem{
                 
                 <sl-input id="lang_title" name="title" label="Language title:" required></sl-input>
                 <sl-input id="lang_title_native" name="title_native" label="Title native"></sl-input>
+                
+                <sl-textarea rows="2" id="lang_icon" name="icon" label="Flag icon svg" help-text="e.g. https://github.com/HatScripts/circle-flags"></sl-textarea>
                 
                 <div class="button-bar">
                     ${this.mode === "Update" ? html`<sl-button @click="${this.resetForm}" variant="warning">Cancel</sl-button>` : nothing}

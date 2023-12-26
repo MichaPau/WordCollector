@@ -100,7 +100,7 @@ export class DefinitionPanel extends LitElement {
                 
                     <!-- <sl-input label="Definition:" required></sl-input> -->
                     <sl-textarea name="definition-text" rows="3" resize="none" autocorrect="on" required></sl-textarea>
-                    <sl-select name="definition-lang" label="Language" value=${this.word.language} required>
+                    <sl-select name="definition-lang" label="Language" value=${this.word.language} required hoist>
                         ${this.lang_list.map((lang) => html`
                             <sl-option value="${lang.lang_id!}">${lang.title}</sl-option>
                         `)}

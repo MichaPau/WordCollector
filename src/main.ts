@@ -1,12 +1,14 @@
 // import { invoke } from "@tauri-apps/api/tauri";
 
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, PropertyValueMap } from 'lit';
 
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { DBSQLiteController } from './controllers/db_sqlite_controller.js';
 import { AppEventController } from './controllers/event_controller.js';
 import { AppSettingsController } from './controllers/app_settings_controller.js';
+
+import { flags } from './components/flags/flag-library.js';
 
 import { Language, Table, Word, Type, DrawerItem } from './app-types.js';
 
@@ -155,6 +157,23 @@ export class MainApp extends LitElement {
     });
 
   }
+
+  protected willUpdate(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    if(_changedProperties.has('lang_list') && this.lang_list.length > 0) {
+      
+      this.lang_list.map((langItem) => {
+        if(langItem.icon === "" || langItem.icon === null || langItem.icon === undefined) {
+          //langItem.icon = flags.defaultEncoded;
+          //langItem.icon = encodeURIComponent(flags.defaultTrimmed);
+          langItem.icon = flags.defaultTrimmed;
+        } else {
+          //langItem.icon = encodeURIComponent(langItem.icon);
+        }
+      });
+
+      console.log("lang_list:", this.lang_list);
+    }
+  }
   
 
   onDrawerClose(ev:Event) {
@@ -185,7 +204,7 @@ export class MainApp extends LitElement {
       <sl-drawer label="Add a new word:" placement="start" class="drawer-placement-bottom" id="word-drawer" @sl-request-close=${this.onDrawerClose}>
         <word-panel .lang_list=${this.lang_list} .type_list=${this.type_list} mode="Add"></word-panel>
       </sl-drawer>
-      <sl-drawer label="Language settings:" placement="start" class="drawer-placement-bottom" id="lang-drawer" @sl-request-close=${this.onDrawerClose}>
+      <sl-drawer label="Language settings:" placement="start" style="--size: 61.4%;" class="drawer-placement-bottom" id="lang-drawer" @sl-request-close=${this.onDrawerClose}>
         <lang-panel .lang_list=${this.lang_list}></lang-panel>
       </sl-drawer>
         <sl-split-panel id="split-panel" position="25">

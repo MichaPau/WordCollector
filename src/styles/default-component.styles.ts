@@ -3,7 +3,7 @@ import { css } from 'lit';
 export default css`
   :root {
     --sl-focus-ring-width: 1px;
-    --sl-focus-ring: 0 0 0 var(--sl-focus-ring-width) #1d69b9;
+    --sl-focus-ring: 0 0 0 var(--sl-focus-ring-width) var(--sl-focus-ring-color);
     
   }
   :host {
@@ -47,9 +47,14 @@ export default css`
     display: flex;
     gap: var(--main-padding);
   }
-
+  .lang-icon {
+        height: 1.6em;
+        width: 1.6em;
+        margin-left: 0.25em;
+        margin-right: 0.25em;
+  }
   sl-drawer::part(panel) {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0.81);
   }
 
   sl-button:focus-within::part(base) {
