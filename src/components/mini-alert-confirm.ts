@@ -112,7 +112,6 @@ export class MiniAlertConfirm extends LitElement {
         //console.log(this.confirmDialog);
         const wrapper = this.shadowRoot!.getElementById("dialog-wrapper")!;
         const bR = wrapper.getBoundingClientRect();
-        console.log(bR.top);
         this.confirmDialog.style.marginTop = bR.top + "px";
         this.confirmDialog.style.marginLeft = (bR.right - 280) + "px";
        

@@ -117,9 +117,7 @@ export class DBSQLiteController implements ReactiveController{
         if(lang_id) {
             q += ` AND w.language = ${lang_id}`;
         }
-        
-
-        console.log(q);
+        //console.log(q);
         let result = await this.db.select(q, [value]);
         
         return result as Array<Word>;
@@ -158,7 +156,7 @@ export class DBSQLiteController implements ReactiveController{
 
     }
     async getWordFromId(id:number):Promise<Array<Word>> {
-        let result = await this.db.select('SELECT *, l.title as language_title FROM word INNER JOIN language l ON l.lang_id = language WHERE word_id = $1', [id]);
+        let result = await this.db.select('SELECT w.*, l.title as language_title FROM word w INNER JOIN language l ON l.lang_id = w.language WHERE w.word_id = $1', [id]);
         //console.log(result);
         return result as Array<Word>;
     }
@@ -293,7 +291,7 @@ export class DBSQLiteController implements ReactiveController{
     }
 
     async deleteTranslation(trans_id:number) {
-        const q = "DELETE FROM translation WHERE trans_id = $1";
+        const q = "DELETE FROM translation WHERE translation_id = $1";
         try {
             let result = await this.db.execute(q, [trans_id]);
             return result;

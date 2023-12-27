@@ -171,7 +171,7 @@ export class MainApp extends LitElement {
         }
       });
 
-      console.log("lang_list:", this.lang_list);
+      //console.log("lang_list:", this.lang_list);
     }
   }
   

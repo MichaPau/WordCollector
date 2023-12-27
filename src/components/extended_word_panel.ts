@@ -19,8 +19,10 @@ import './trans-panel.js';
 import './def-panel.js';
 import './def-area.js';
 import './word-forms-helper.js';
+import './mini-alert-confirm.js';
 //import { AppRequestWordDataEvent } from '../events/app-request-word-data.js';
 import { DeferredEvent } from '../events/app-events.js';
+import { MiniAlertConfirm } from './mini-alert-confirm.js';
 
 @customElement('extend-word-panel')
 export class ExtendWordPanel extends LitElement implements DrawerItem {
@@ -63,16 +65,10 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
 
         .translation-text {
             width: 100%;
-            /* &::part(input) {
-                background-color: var(--sl-input-background-color);
-                border-color: var(--sl-input-border-color);
-                opacity: 1.0;
-                color: var(--sl-input-color);
-                cursor: pointer;
-            } */
-           
         }
-
+        .alert-confirm-style {
+            transform: translate(-25%, 0);
+        }
         .border {
             border: 1px solid black;
         }
@@ -89,23 +85,13 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         .def-text {
             flex: 1 1 80%;
         }
-        /* .textarea-span {
-            flex: 1 1 80%;
-            border: 1px solid #000;
-            padding: 5px;
-
-        } */
+        
         sl-tab-panel {
             padding-left: var(--main-padding);
             padding-right: var(--main-padding);
         }
 
-        /* sl-details::part(content) {
-            overflow: visible
-        }
-        .details__body {
-                overflow: visible;
-        } */
+        
         translation-panel::part(content-container) {
             width: var(--not-full-width);
         }
@@ -164,6 +150,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
     }
 
     getWordDetails() {
+        
         const getDataEvent:DeferredEvent<Word> = new DeferredEvent(event_types.GET_WORD_DETAILS, this.word.word_id);
         const p:Promise<Word> = getDataEvent.promise;
 
@@ -206,10 +193,10 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
     }
 
     deleteTranslation(item:Translation) {
+        //console.log("Delete translation:"+JSON.stringify(item,  null, 2));
         var deleteTransEvent = new DeferredEvent<string>(event_types.DELETE_TRANSLATION, item);
         const p:Promise<string> = deleteTransEvent.promise;
         p.then(() => {
-            //this.getTables('definition');
             this.getWordDetails();
         }).catch((e) => {
             console.log(e);
@@ -247,6 +234,7 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                                     else
                                         iconEncoded = encodeURIComponent(flags.defaultTrimmed);
                                     
+                                    const confirmID = "confirm-alert-trans-" + item.translation_id;
                                     return html`
                                     <li class="detail-item">
                                         <sl-input class="translation-text" value="${item.to_word_id} - ${item.to_Word?.word} - ${item.to_Word?.language_title}" readonly>
@@ -255,10 +243,15 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                                         <!-- <div>${item.to_word_id} - ${item.to_Word?.word} - ${item.to_Word?.language_title}</div> -->
                                         <sl-tooltip content="Delete" hoist>
                                             <sl-icon-button name="trash" label="Delete" 
-                                            @click=${() => this.deleteTranslation(item)}></sl-icon-button>
+                                            @click=${() => {
+                                                (this.shadowRoot!.querySelector("#"+confirmID) as MiniAlertConfirm).show();
+                                            }}></sl-icon-button>
                                         </sl-tooltip>
                                         
-                                        <!-- <sl-button @click=${() => this.deleteTranslation(item)}>Delete</sl-button> -->
+                                        <mini-alert-confirm class="alert-confirm-style" id=${confirmID} 
+                                            @on-confirm-cancel=${() => console.log("confirm-canel:", item)} 
+                                            @on-confirm-ok=${()=> this.deleteTranslation(item)}>
+                                        </mini-alert-confirm>
                                     </li>
                                 `})}
                                 </ul>
