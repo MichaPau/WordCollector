@@ -42,6 +42,8 @@ export const RESET_SEARCH_WORDS = "RESET_SEARCH_WORDS";
 export const SORT_TABLE= "SORT_TABLE";
 export const SORT_ICON_ACTIVE = "SORT_ICON_ACTIVE";
 
+export const WAIT_FOR_ME = "WAIT_FOR_ME";
+
 // export const WORD_FORM_SUBMIT = "WORD_FORM_SUBMIT";
 // export const WORD_FORM_CANCEL = "WORD_FORM_CANCEL";
 
@@ -82,6 +84,8 @@ export class AppEventController implements ReactiveController {
         this.host.addEventListener(ADD_WORD, this.onAddWord);
         this.host.addEventListener(UPDATE_WORD, this.onUpdateWord);
         this.host.addEventListener(DELETE_WORD, this.onDeleteWord);
+
+        this.host.addEventListener(WAIT_FOR_ME, this.waitForMe);
     }
     hostDisconnected(): void {
         this.host.removeEventListener(testEvent, this.onTestEvent);
@@ -110,6 +114,8 @@ export class AppEventController implements ReactiveController {
         this.host.removeEventListener(ADD_LANGUAGE, this.onAddLanguage);
         this.host.removeEventListener(UPDATE_LANGUAGE, this.onUpdateLanguage);
         this.host.removeEventListener(DELETE_LANGUAGE, this.onDeleteLanguage);
+
+        this.host.removeEventListener(WAIT_FOR_ME, this.waitForMe);
     }
 
     timeout(ms:number) {
@@ -154,6 +160,11 @@ export class AppEventController implements ReactiveController {
         // }
     }
 
+    waitForMe = async (ev:Event) => {
+        const _ev:DeferredEvent<number> = ev as DeferredEvent<number>;
+        let ms = _ev.detail;
+        await this.timeout(ms).then(() => _ev.resolve(ms)).catch((e) => _ev.reject(e));
+    }
     onSortTable = (ev:Event) => {
        this.host.settingsCtr.updateSort((ev as CustomEvent).detail); 
     }

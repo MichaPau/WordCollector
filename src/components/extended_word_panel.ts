@@ -214,6 +214,12 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
         return undefined;
     }
     render() {
+        const langItem = this.lang_list.find(lang => lang.lang_id === this.word.language);
+        let iconEncoded;
+        if(langItem)
+            iconEncoded = encodeURIComponent(langItem.icon!);
+        else
+            iconEncoded = encodeURIComponent(flags.defaultTrimmed);
         return html`
             <div id="container">
                 
@@ -223,7 +229,9 @@ export class ExtendWordPanel extends LitElement implements DrawerItem {
                     <sl-tab slot="nav" panel="add_definition">Add Definition</sl-tab>
                     <sl-tab-panel name="show_details">
                         <div id="details-group">
-                            <word-form-helper forms-string=${this.word.forms!}></word-form-helper>
+                            <word-form-helper forms-string=${this.word.forms!} .word=${this.word}>
+                                <img slot="icon" class="lang-icon" src='data:image/svg+xml;charset=UTF-8,${iconEncoded!}'>
+                            </word-form-helper>
                             <sl-details id="translation" summary="Translations (${this.translations.length})">
                                 <ul class="detail-list">
                                 ${this.translations.map((item:Translation) => {

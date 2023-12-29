@@ -189,6 +189,7 @@ export class TranslationPanel extends LitElement {
             console.log(result);
             this.resultInfo.className = "success";
             this.resultInfo.innerHTML = result;
+            this.wordForm.loadingState = false;
             setTimeout(() => {
                 this.dispatchEvent(new CustomEvent('app-request-word-data', {bubbles: true, composed: true}));
              }, CLOSE_TIMEOUT_MS);
