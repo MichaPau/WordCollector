@@ -198,6 +198,7 @@ export class TranslationPanel extends LitElement {
             console.log("Promise rejected:", e);
             this.resultInfo.className = "error";
             this.resultInfo.innerHTML = "Error: "+e;
+            this.wordForm.loadingState = false;
         });
 
         this.dispatchEvent(addEvent);

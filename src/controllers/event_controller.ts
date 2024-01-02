@@ -361,81 +361,39 @@ export class AppEventController implements ReactiveController {
     }
 
     async languageActionWithPromise(f:Function, ev:Event) {
+        const _ev = (ev as DeferredEvent<string>);
+        var l:Language = _ev.detail.lang;
         
-        var l:Language = (ev as CustomEvent).detail.item;
         await f.call(this.host.dbCtr, l).then((result:QueryResult) => {
-            let resolve =  (ev as CustomEvent).detail.resolve;
-            resolve(result);
+
+            _ev.resolve(JSON.stringify(result));
             (async () => {
                 this.host.lang_list = await this.host.dbCtr.selectAll('language');
             })();
         })
         .catch((e:unknown) => {
-            let reject =  (ev as CustomEvent).detail.reject;
-            reject(e);
+            _ev.reject(e);
         });
     }
-
+    
     async wordActionWithPromise(f:Function, ev:Event) {
         
-        var w:Word = (ev as CustomEvent).detail.item;
+        const _ev = (ev as DeferredEvent<string>);
+        var w:Word = _ev.detail.word;
+       
         await f.call(this.host.dbCtr, w).then(async (result:QueryResult) => {
-            let resolve =  (ev as CustomEvent).detail.resolve;
+            
             // await this.timeout(2000);
-            resolve(result);
+            _ev.resolve(JSON.stringify(result));
             (async () => {
                 //this.host.word_list = await this.host.dbCtr.selectAllWords();
                 this.reloadWordList();
             })();
         })
         .catch((e:unknown) => {
-            let reject =  (ev as CustomEvent).detail.reject;
-            reject(e);
+            _ev.reject(e);
         });
     }
-
-    // onAddLanguage = async (ev:Event) => {
-
-    //     var l:Language = (ev as CustomEvent).detail.lang;
-    //     await this.host.dbCtr.addLanguage(l).then((result) => {
-    //         let resolve =  (ev as CustomEvent).detail.resolve;
-    //         resolve("success");
-    //         (async () => {
-    //             this.host.lang_list = await this.host.dbCtr.selectAll('language');
-    //         })();
-    //     })
-    //     .catch((e) => {
-    //         let reject =  (ev as CustomEvent).detail.reject;
-    //         reject(e);
-    //     });
-    // }
-    // onUpdateLanguage = async (ev:Event) => {
-    //     var l:Language = (ev as CustomEvent).detail.lang;
-    //     await this.host.dbCtr.updateLanguage(l).then((result) => {
-    //         let resolve =  (ev as CustomEvent).detail.resolve;
-    //         resolve("success");
-    //         (async () => {
-    //             this.host.lang_list = await this.host.dbCtr.selectAll('language');
-    //         })();
-    //     })
-    //     .catch((e) => {
-    //         let reject =  (ev as CustomEvent).detail.reject;
-    //         reject(e);
-    //     });
-    // }
-    // onDeleteLanguage = async (ev:Event) => {
-    //     var l:Language = (ev as CustomEvent).detail.lang;
-    //     await this.host.dbCtr.deleteLanguage(l).then((result) => {
-    //         let resolve =  (ev as CustomEvent).detail.resolve;
-    //         resolve("success");
-    //         (async () => {
-    //             this.host.lang_list = await this.host.dbCtr.selectAll('language');
-    //         })();
-    //     })
-    //     .catch((e) => {
-    //         let reject =  (ev as CustomEvent).detail.reject;
-    //         reject(e);
-    //     });
-    // }
+   
 
 }

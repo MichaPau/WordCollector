@@ -10,6 +10,7 @@ import compStyles from '../styles/default-component.styles.js';
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
 import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.component.js';
 import { SlTextarea } from '@shoelace-style/shoelace';
+import { DeferredEvent } from '../events/app-events.js';
 
 @customElement('lang-panel')
 export class LanguagePanel extends LitElement implements DrawerItem{
@@ -117,17 +118,16 @@ export class LanguagePanel extends LitElement implements DrawerItem{
         return undefined;
 
     }
+
     private addLanguage = (ev:Event) => {
         ev.preventDefault();
-        //console.log("onAddWord:", this);
-        
         var form:HTMLFormElement = this.shadowRoot!.querySelector("#lang-form")!;
         var result:HTMLElement = this.shadowRoot!.querySelector("#result-info")!;
         result.innerHTML = "";
         
         const formData = new FormData(form!);
         const formObj = Object.fromEntries(formData.entries());
-        console.log(formObj);
+        //console.log(formObj);
         var lang:Language = {
             "token": formObj.token as string, 
             "title": formObj.title as string, 
@@ -135,20 +135,21 @@ export class LanguagePanel extends LitElement implements DrawerItem{
         };
     
         let result_msg = "";
+        let type;
         if(this.mode === 'Add') {
             result_msg = " added.";
+            type = event_types.ADD_LANGUAGE;
         } else {
             result_msg = " updated.";
-            lang.lang_id = parseInt(formObj.id as string); 
+            lang.lang_id = parseInt(formObj.id as string);
+            type = event_types.UPDATE_LANGUAGE;
         }
-        
-        if(formObj.icon !== "") lang.icon = formObj.icon as string;
-        // console.log("form_id:", formObj.id as string)
-        // console.log("lang_id:", lang.lang_id);
 
-        const {promise, resolve, reject} = deferred<string>();
-        promise
-        .then((value) => {
+        if(formObj.icon !== "") lang.icon = formObj.icon as string;
+        const langEvent:DeferredEvent<string> = new DeferredEvent<string>(type, { lang: lang});
+        const p = langEvent.promise;
+
+        p.then((value) => {
             console.log("Promise resolved:",value);
             form.reset();
             result.className = "success";
@@ -159,23 +160,68 @@ export class LanguagePanel extends LitElement implements DrawerItem{
             result.className = "error";
             result.innerHTML = "Error: "+e;
         });
+
+        this.dispatchEvent(langEvent);
+
+
+    }
+    async executeDelete() {
+        const deleteResult = this.deleteDialog?.querySelector("#delete-result")!;
+        const langEvent:DeferredEvent<string> = new DeferredEvent<string>(event_types.DELETE_LANGUAGE, { lang: this.deleteItem!});
+        const p = langEvent.promise;
+
+        p
+        .then((value) => {
+            console.log("Promise resolved:",value);
+            deleteResult.className = "success";
+            deleteResult.innerHTML = this.deleteItem?.title + " deleted.";
+
+            setTimeout(() => {
+                this.deleteItem = undefined;
+                deleteResult.innerHTML = "";
+                this.deleteDialog?.hide();
+            }, CLOSE_TIMEOUT_MS);
+            
+        })
+        .catch((e) => { 
+            console.log("Promise rejected:", e);
+            deleteResult.className = "error";
+            deleteResult.innerHTML = e;
+        });
+
+        this.dispatchEvent(langEvent);
+    }
+    async executeDelete2() {
+        const deleteResult = this.deleteDialog?.querySelector("#delete-result")!;
+       //console.log(deleteResult);
+        const {promise, resolve, reject} = deferred<string>();
+        promise
+        .then((value) => {
+            console.log("Promise resolved:",value);
+            deleteResult.className = "success";
+            deleteResult.innerHTML = this.deleteItem?.title + " deleted.";
+
+            setTimeout(() => {
+                this.deleteItem = undefined;
+                deleteResult.innerHTML = "";
+                this.deleteDialog?.hide();
+            }, CLOSE_TIMEOUT_MS);
+            
+        })
+        .catch((e) => { 
+            console.log("Promise rejected:", e);
+            deleteResult.className = "error";
+            deleteResult.innerHTML = e;
+        });
     
         const options:DBEventOptionsItem = {
-            detail: {"resolve": resolve, "reject": reject, "item": lang},
+            detail: {"resolve": resolve, "reject": reject, "item": this.deleteItem!},
             bubbles: true,
             composed: true
         };
-    
-        if(this.mode === "Add")
-            this.dispatchEvent(new CustomEvent(event_types.ADD_LANGUAGE, options));
-        else if(this.mode === "Update")
-            this.dispatchEvent(new CustomEvent(event_types.UPDATE_LANGUAGE, options));
-        else {
-            result.className = "error";
-            result.innerHTML = "Something went wrong - cannot fix..";
-        }
-        //console.log("The word is:",word);
+        this.dispatchEvent(new CustomEvent(event_types.DELETE_LANGUAGE, options));
     }
+    
     
     checkToken(ev:Event) {
         const elem:HTMLInputElement = (ev.currentTarget  as HTMLInputElement);
@@ -216,36 +262,7 @@ export class LanguagePanel extends LitElement implements DrawerItem{
         this.deleteItem = undefined;
         this.deleteDialog?.hide();
     }
-    async executeDelete() {
-        const deleteResult = this.deleteDialog?.querySelector("#delete-result")!;
-       //console.log(deleteResult);
-        const {promise, resolve, reject} = deferred<string>();
-        promise
-        .then((value) => {
-            console.log("Promise resolved:",value);
-            deleteResult.className = "success";
-            deleteResult.innerHTML = this.deleteItem?.title + " deleted.";
-
-            setTimeout(() => {
-                this.deleteItem = undefined;
-                deleteResult.innerHTML = "";
-                this.deleteDialog?.hide();
-            }, CLOSE_TIMEOUT_MS);
-            
-        })
-        .catch((e) => { 
-            console.log("Promise rejected:", e);
-            deleteResult.className = "error";
-            deleteResult.innerHTML = e;
-        });
     
-        const options:DBEventOptionsItem = {
-            detail: {"resolve": resolve, "reject": reject, "item": this.deleteItem!},
-            bubbles: true,
-            composed: true
-        };
-        this.dispatchEvent(new CustomEvent(event_types.DELETE_LANGUAGE, options));
-    }
     resetForm () {
         this.mode = "Add";
         this.lang_id!.value = "";

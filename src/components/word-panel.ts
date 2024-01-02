@@ -1,7 +1,7 @@
-import { LitElement, html, css, PropertyValueMap, nothing } from 'lit';
+import { LitElement, html, css, PropertyValueMap } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { DrawerItem, Language, Type, Word, deferred, DBEventOptionsItem } from '../app-types';
+import { DrawerItem, Language, Type, Word} from '../app-types';
 
 import * as event_types from '../controllers/event_controller.js';
 
@@ -10,6 +10,7 @@ import compStyles from '../styles/default-component.styles.js';
 
 import './word-form.js';
 import { WordForm } from './word-form.js';
+import { DeferredEvent } from '../events/app-events.js';
 // import { DeferredEvent } from '../events/app-events.js';
 // import { QueryResult } from 'tauri-plugin-sql-api';
 
@@ -44,14 +45,6 @@ export class WordPanel extends LitElement implements DrawerItem {
         compStyles,
         css`
 
-        /* .error {
-            color: var(--error-color);
-        }
-
-        .success {
-            color: var(--success-color);
-        } */
-       
         `
     ];
 
@@ -63,64 +56,6 @@ export class WordPanel extends LitElement implements DrawerItem {
         result.innerHTML = "";
         return undefined;
     }
-    // private addWord = (ev:Event) => {
-    //     ev.preventDefault();
-        
-    //     var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
-    //     var result:HTMLElement = this.shadowRoot!.querySelector("#result-info")!;
-    //     result.innerHTML = "";
-        
-    //     const formData = new FormData(form!);
-    //     const formObj = Object.fromEntries(formData.entries());
-    //     var word:Word = {
-    //         "word": formObj["word-input"] as string, 
-    //         "language": parseInt(formObj["word-lang"] as string),
-    //         "type": formObj["word-type"] as string
-    //     };
-        
-    //     let result_msg = "";
-    //     if(this.mode === 'Add') {
-    //         result_msg = " added.";
-    //     } else {
-    //         result_msg = " updated.";
-    //         word.word_id = parseInt(formObj.id as string); 
-    //     }
-
-    //     this.word = word;
-       
-    //     const {promise, resolve, reject} = deferred<string>();
-    //     promise
-    //     .then((value) => {
-    //         console.log("Promise resolved:",value);
-            
-    //         result.className = "success";
-    //         result.innerHTML = word.word + result_msg;
-    //         setTimeout(() => {
-    //            this.closeAction();
-    //            if(this.mode === "Update") {
-    //                 this.dispatchEvent(new Event(event_types.CLOSE_WORD_DIALOG, {bubbles:true, composed: true}));
-    //            } else {
-    //                 form.reset();
-    //            }
-    //         }, CLOSE_TIMEOUT_MS);
-    //     })
-    //     .catch((e) => { 
-    //         console.log("Promise rejected:", e);
-    //         result.className = "error";
-    //         result.innerHTML = "Error: "+e;
-    //     });
-    
-    //     const options:DBEventOptionsItem = {
-    //         detail: {"resolve": resolve, "reject": reject, "item": word},
-    //         bubbles: true,
-    //         composed: true
-    //     };
-    
-    //     if(this.mode === "Add") 
-    //         this.dispatchEvent(new CustomEvent(event_types.ADD_WORD, options));
-    //     else
-    //         this.dispatchEvent(new CustomEvent(event_types.UPDATE_WORD, options));
-    // }
     
     cancelUpdate() {
         var form:HTMLFormElement = this.shadowRoot!.querySelector("#word-form")!;
@@ -132,20 +67,25 @@ export class WordPanel extends LitElement implements DrawerItem {
     }
 
     onWordSubmit(_ev:Event) {
-        console.log('onTestWordSubmit', _ev.currentTarget);
         const ev:CustomEvent = (_ev as CustomEvent);
+       
         this.resultInfo.innerHTML = "";
 
-        let result_msg = "";
-        if(this.mode === 'Add') {
+        let type;
+        let result_msg: String;
+        if(this.mode === "Add") {
+            type = event_types.ADD_WORD;
             result_msg = " added.";
-        } else {
+        }
+        else {
+            type = event_types.UPDATE_WORD;
             result_msg = " updated.";
         }
 
-        const {promise, resolve, reject} = deferred<string>();
-        promise
-        .then((value) => {
+        const addEvent:DeferredEvent<string> = new DeferredEvent<string>(type, { word: ev.detail});
+
+        const p = addEvent.promise;
+        p.then((value) => {
             console.log("Promise resolved:",value);
             
             this.resultInfo.className = "success";
@@ -157,7 +97,7 @@ export class WordPanel extends LitElement implements DrawerItem {
                     this.wordForm.loadingState = false;
                     this.dispatchEvent(new Event(event_types.CLOSE_WORD_DIALOG, {bubbles:true, composed: true}));
                } else {
-                    //form.reset();
+                    this.wordForm.loadingState = false;
                }
             }, CLOSE_TIMEOUT_MS);
         })
@@ -170,17 +110,9 @@ export class WordPanel extends LitElement implements DrawerItem {
             //this.wordForm.loadingState = false;
         });
 
-        const options:DBEventOptionsItem = {
-            detail: {"resolve": resolve, "reject": reject, "item": ev.detail},
-            bubbles: true,
-            composed: true
-        };
-    
-        if(this.mode === "Add") 
-            this.dispatchEvent(new CustomEvent(event_types.ADD_WORD, options));
-        else
-            this.dispatchEvent(new CustomEvent(event_types.UPDATE_WORD, options));
+        this.dispatchEvent(addEvent);
     }
+    
     onWordCancel() {
         this.wordForm.reset();
         this.dispatchEvent(new Event(event_types.CANCEL_UPDATE, {bubbles:true, composed: true}));

@@ -58,7 +58,7 @@ export class WordFormHelper extends LitElement {
         this.formsString = this.word.forms;
 
         console.log("WordFormsHelper:",this.formsString);
-        if(this.formsString !== undefined && this.formsString !== '') {
+        if(this.formsString !== undefined && this.formsString !== '' && this.formsString !== null) {
             try {
                 const temp = JSON.parse(this.formsString);
                 console.log(temp.gender);
@@ -71,7 +71,7 @@ export class WordFormHelper extends LitElement {
                 console.log(e);
             }
         } else {
-            //this.wordForms = {"gender": "", "alternative-forms": []};
+            this.wordForms = {"gender": "", "alternative-forms": []};
         }
     }
     render() {
